@@ -1958,7 +1958,7 @@ struct ff7_externals
 	uint32_t sub_74DB8C;
 	void (*sub_767039)(DWORD*,DWORD*,DWORD*);
 	uint32_t play_battle_music_call;
-	uint32_t (*play_battle_end_music)();
+	external_fn<uint32_t()> play_battle_end_music;
 	uint32_t play_battle_music_win_call;
 	uint32_t wm_change_music;
 	uint32_t wm_play_music_call;
@@ -1979,14 +1979,14 @@ struct ff7_externals
 	uint32_t battle_sub_5C7F94;
 	uint32_t menu_battle_end_sub_6C9543;
 	uint32_t menu_sub_71FF95, menu_shop_loop, get_materia_gil, opcode_increase_gil_call;
-	uint32_t opcode_add_materia_inventory_call, menu_sub_6CBCF3, menu_sub_705D16, menu_sub_6CC17F;
+	uint32_t opcode_add_materia_inventory_call, menu_sub_6CBCF3, menu_sub_705D16;
 	uint32_t battle_sub_42782A;
 	uint32_t battle_set_command_and_action_id;
+	external_fn<void(int)> menu_sub_6CBCB9;
 	uint32_t menu_decrease_item_quantity;
 	uint32_t sub_610973, sub_611098;
 	uint32_t sub_60FA7D;
 	uint32_t menu_sub_7212FB;
-	uint32_t load_save_file;
 	uint32_t handle_actor_ready;
 	WORD* battle_menu_state;
 	uint32_t set_battle_menu_state_data;
@@ -1996,6 +1996,7 @@ struct ff7_externals
 	byte* issued_command_id;
 	byte* issued_action_target_type;
 	byte* issued_action_target_index;
+	external_fn<int(int)> load_save_file;
 	uint32_t field_load_models_atoi;
 	battle_camera_fn_data* battle_camera_data;
 	battle_camera_position* battle_camera_position_BE10F0;
