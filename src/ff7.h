@@ -1964,8 +1964,7 @@ struct ff7_modules_global_object
   uint8_t field_13;
   uint8_t field_14;
   uint8_t field_15;
-  uint8_t field_16;
-  uint8_t field_17;
+  uint16_t field_16;
   uint16_t field_18;
   uint16_t field_1A;
   uint8_t field_1C;
@@ -2122,6 +2121,82 @@ struct field_animation_data
 	uint32_t *anim_frame_object;
 	uint32_t *field_17C;
 	byte field_180[16];
+};
+
+struct ff7_field_camera
+{
+	int16_t eye_x;
+	int16_t eye_y;
+	int16_t eye_z;
+	int16_t target_x;
+	int16_t target_y;
+	int16_t target_z;
+	int16_t up_x;
+	int16_t up_y;
+	int16_t up_z;
+	int16_t pos_x;
+	int16_t pan_x;
+	int16_t pos_y;
+	int16_t pan_y;
+	int16_t pos_z;
+	int16_t zoom;
+};
+
+struct field_gateway
+{
+	vector3<short> v1_exit_line;
+	vector3<short> v2_exit_line;
+	vector3<short> destination_vertex;
+	SHORT field_id;
+	byte unknown[4];
+};
+
+struct field_trigger
+{
+	vector3<short> v_corner1;
+	vector3<short> v_corner2;
+	byte bg_group_id;
+	byte bg_frame_id;
+	byte behavior;
+	byte sound_id;
+};
+
+struct field_arrow
+{
+	int pos_x;
+	int pos_y;
+	int pos_z;
+	int arrow_type;
+};
+
+struct field_camera_range
+{
+	short left;
+	short bottom;
+	short right;
+	short top;
+};
+
+struct field_trigger_header
+{
+	byte field_name[9];
+	byte control_direction;
+	short focus_height;
+	field_camera_range camera_range;
+	byte field_14[4];
+	short bg_layer_3_anim_width;
+	short bg_layer_3_anim_height;
+	short bg_layer_4_anim_width;
+	short bg_layer_4_anim_height;
+	short bg_3_speed_x;
+	short bg_3_speed_y;
+	short bg_4_speed_x;
+	short bg_4_speed_y;
+	short field_28[8];
+	field_gateway gateways[12];
+	field_trigger triggers[12];
+	byte show_arrow_flag[12];
+	field_arrow arrows[12];
 };
 
 struct world_event_data
@@ -2285,13 +2360,26 @@ struct ff7_externals
 	uint32_t field_sub_6388EE;
 	uint32_t field_draw_everything;
 	uint32_t field_pick_tiles_make_vertices;
+	uint32_t field_layer1_pick_tiles;
+	uint32_t *field_layer1_tiles_num;
+	uint32_t **field_layer1_palette_sort;
+	field_tile **field_layer1_tiles;
 	uint32_t field_layer2_pick_tiles;
 	uint32_t *field_layer2_tiles_num;
 	uint32_t **field_layer2_palette_sort;
-	struct field_tile **field_layer2_tiles;
+	field_tile **field_layer2_tiles;
+	uint32_t field_layer3_pick_tiles;
+	uint32_t *field_layer3_tiles_num;
+	uint32_t **field_layer3_palette_sort;
+	field_tile **field_layer3_tiles;
 	uint32_t *field_special_y_offset;
 	uint32_t *field_bg_multiplier;
 	void (*add_page_tile)(float, float, float, float, float, uint32_t, uint32_t);
+	int *do_draw_layer3_CFFE3C;
+	int *field_layer3_flag_CFFE40;
+	double (*layer3_sub_C23C0F)(ff7_field_camera*, int, int, int);
+	field_trigger_header** field_triggers_header;
+	ff7_field_camera* field_camera_CFF3D8;
 	uint32_t field_load_textures;
 	void (*field_convert_type2_layers)();
 	void (*make_struc3)(uint32_t, struct struc_3 *);
@@ -2415,7 +2503,7 @@ struct ff7_externals
 	uint32_t field_battle_toggle;
 	uint32_t worldmap_battle_toggle;
 	uint32_t enter_field;
-	uint32_t sub_63C17F;
+	uint32_t field_loop_sub_63C17F;
 	uint32_t field_update_models_positions;
 	int (*field_update_single_model_position)(short);
 	void (*field_update_model_animation_frame)(short);
@@ -2430,6 +2518,8 @@ struct ff7_externals
 	uint32_t sub_40B27B;
 	WORD* word_CC0DD4;
 	WORD* word_CC1638;
+	void (*field_update_background_positions)();
+	WORD* field_bg_flag_CC15E4;
 	uint32_t sub_630D50;
 	uint32_t sub_631945;
 	WORD* opcode_message_loop_code;

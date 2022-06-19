@@ -305,13 +305,26 @@ void ff7_find_externals(struct ff7_game_obj* game_object)
 	ff7_externals.field_sub_6388EE = get_relative_call(field_main_loop, 0xFF);
 	ff7_externals.field_draw_everything = get_relative_call(ff7_externals.field_sub_6388EE, 0x11);
 	ff7_externals.field_pick_tiles_make_vertices = get_relative_call(ff7_externals.field_draw_everything, 0xC9);
+	ff7_externals.field_layer1_pick_tiles = get_relative_call(ff7_externals.field_pick_tiles_make_vertices, 0x2D);
+	ff7_externals.field_layer1_tiles_num = (uint32_t *)get_absolute_value(ff7_externals.field_layer1_pick_tiles, 0x8B);
+	ff7_externals.field_layer1_palette_sort = (uint32_t **)get_absolute_value(ff7_externals.field_layer1_pick_tiles, 0xA2);
+	ff7_externals.field_layer1_tiles = (field_tile **)get_absolute_value(ff7_externals.field_layer1_pick_tiles, 0xBF);
 	ff7_externals.field_layer2_pick_tiles = get_relative_call(ff7_externals.field_pick_tiles_make_vertices, 0x48);
 	ff7_externals.field_layer2_tiles_num = (uint32_t *)get_absolute_value(ff7_externals.field_layer2_pick_tiles, 0x8C);
 	ff7_externals.field_layer2_palette_sort = (uint32_t **)get_absolute_value(ff7_externals.field_layer2_pick_tiles, 0xA3);
 	ff7_externals.field_layer2_tiles = (field_tile **)get_absolute_value(ff7_externals.field_layer2_pick_tiles, 0xC0);
+	ff7_externals.field_layer3_pick_tiles = get_relative_call(ff7_externals.field_pick_tiles_make_vertices, 0x12);
+	ff7_externals.field_layer3_tiles_num = (uint32_t *)get_absolute_value(ff7_externals.field_layer3_pick_tiles, 0xAB);
+	ff7_externals.field_layer3_palette_sort = (uint32_t **)get_absolute_value(ff7_externals.field_layer3_pick_tiles, 0xC1);
+	ff7_externals.field_layer3_tiles = (field_tile **)get_absolute_value(ff7_externals.field_layer3_pick_tiles, 0xDD);
 	ff7_externals.field_special_y_offset = (uint32_t *)get_absolute_value(ff7_externals.field_layer2_pick_tiles, 0x43);
 	ff7_externals.field_bg_multiplier = (uint32_t *)get_absolute_value(ff7_externals.field_layer2_pick_tiles, 0x23);
 	ff7_externals.add_page_tile = (void (*)(float, float, float, float, float, uint32_t, uint32_t))get_relative_call(ff7_externals.field_layer2_pick_tiles, 0x327);
+	ff7_externals.do_draw_layer3_CFFE3C = (int*)get_absolute_value(ff7_externals.field_layer3_pick_tiles, 0x9);
+	ff7_externals.field_layer3_flag_CFFE40 = (int*)get_absolute_value(ff7_externals.field_layer3_pick_tiles, 0x3B1);
+	ff7_externals.layer3_sub_C23C0F = (double(*)(ff7_field_camera*, int, int, int))get_relative_call(ff7_externals.field_layer3_pick_tiles, 0x7E);
+	ff7_externals.field_triggers_header = (field_trigger_header**)get_absolute_value(ff7_externals.field_layer3_pick_tiles, 0x134);
+	ff7_externals.field_camera_CFF3D8 = (ff7_field_camera*)get_absolute_value(ff7_externals.field_layer3_pick_tiles, 0x7A);
 
 	ff7_externals.field_load_textures = get_relative_call(ff7_externals.field_sub_60DCED, 0x107);
 	ff7_externals.field_convert_type2_layers = (void (*)())get_relative_call(ff7_externals.field_load_textures, 0xD);
@@ -501,8 +514,8 @@ void ff7_find_externals(struct ff7_game_obj* game_object)
 	ff7_externals.on_gameover_exit = ff7_externals.exit_gameover + 0x21;
 
 	ff7_externals.enter_field = get_absolute_value(main_loop, 0x90D);
-	ff7_externals.sub_63C17F = get_relative_call(field_main_loop, 0x59);
-	ff7_externals.field_update_models_positions = get_relative_call(ff7_externals.sub_63C17F, 0x5DD);
+	ff7_externals.field_loop_sub_63C17F = get_relative_call(field_main_loop, 0x59);
+	ff7_externals.field_update_models_positions = get_relative_call(ff7_externals.field_loop_sub_63C17F, 0x5DD);
 	ff7_externals.field_update_single_model_position = (int (*)(int16_t))get_relative_call(ff7_externals.field_update_models_positions, 0x8BC);
 	ff7_externals.field_update_model_animation_frame = (void (*)(int16_t))get_relative_call(ff7_externals.field_update_models_positions, 0x68D);
 	ff7_externals.field_check_collision_with_target = (int (*)(field_event_data*, short))get_relative_call(ff7_externals.field_update_models_positions, 0x9AA);
@@ -511,18 +524,20 @@ void ff7_find_externals(struct ff7_game_obj* game_object)
 	ff7_externals.field_evaluate_encounter_rate_60B2C6 = (void (*)())get_relative_call(ff7_externals.field_update_models_positions, 0x90F);
 	ff7_externals.field_player_model_id = (short*)get_absolute_value(ff7_externals.field_update_models_positions, 0x45D);
 	ff7_externals.field_n_models = (WORD*)get_absolute_value(ff7_externals.field_update_models_positions, 0x25);
-	ff7_externals.field_update_camera_data = get_relative_call(ff7_externals.sub_63C17F, 0xFD);
+	ff7_externals.field_update_camera_data = get_relative_call(ff7_externals.field_loop_sub_63C17F, 0xFD);
 	ff7_externals.field_camera_data = (ff7_camdata**)get_absolute_value(ff7_externals.field_update_camera_data, 0x84);
-	ff7_externals.sub_40B27B = get_relative_call(ff7_externals.sub_63C17F, 0xEE);
+	ff7_externals.sub_40B27B = get_relative_call(ff7_externals.field_loop_sub_63C17F, 0xEE);
 	ff7_externals.word_CC0DD4 = (WORD*)get_absolute_value(ff7_externals.enter_field, 0x124);
 	ff7_externals.word_CC1638 = (WORD*)get_absolute_value(ff7_externals.sub_40B27B, 0x25);
+	ff7_externals.field_update_background_positions = (void (*)())get_relative_call(ff7_externals.field_loop_sub_63C17F, 0x1A6);
+	ff7_externals.field_bg_flag_CC15E4 = (WORD*)get_absolute_value((uint32_t)ff7_externals.field_update_background_positions, 0x129);
 
 	ff7_externals.sfx_stop_channel_6 = get_relative_call(common_externals.sfx_cleanup, 0x16);
 	ff7_externals.sfx_stop_channel_timer_handle = (UINT *)get_absolute_value(ff7_externals.sfx_stop_channel_6, 0x5);
 
-	ff7_externals.current_movie_frame = (WORD*)get_absolute_value(ff7_externals.sub_63C17F, 0x133);
-	ff7_externals.opening_movie_music_start_frame = (DWORD *)(ff7_externals.sub_63C17F + 0x139);
-	ff7_externals.opening_movie_play_midi_call = ff7_externals.sub_63C17F + 0x145;
+	ff7_externals.current_movie_frame = (WORD*)get_absolute_value(ff7_externals.field_loop_sub_63C17F, 0x133);
+	ff7_externals.opening_movie_music_start_frame = (DWORD *)(ff7_externals.field_loop_sub_63C17F + 0x139);
+	ff7_externals.opening_movie_play_midi_call = ff7_externals.field_loop_sub_63C17F + 0x145;
 
 	ff7_externals.byte_CC164C = (BYTE *)get_absolute_value(main_loop, 0x32A);
 	ff7_externals.word_CC0DC6 = (WORD *)get_absolute_value(main_init_loop, 0x4BD);
@@ -569,7 +584,7 @@ void ff7_find_externals(struct ff7_game_obj* game_object)
 	ff7_externals.field_game_moment = (WORD*)get_absolute_value(common_externals.execute_opcode_table[0x9D], 0xEA); //0xDC08DC
 
 	ff7_externals.sub_408074 = get_relative_call(main_loop, 0x681);
-	ff7_externals.sub_60BB58 = get_relative_call(ff7_externals.sub_63C17F, 0x16F);
+	ff7_externals.sub_60BB58 = get_relative_call(ff7_externals.field_loop_sub_63C17F, 0x16F);
 	common_externals.update_field_entities = get_relative_call(ff7_externals.sub_60BB58, 0x3A); // 0x60C94D
 
 	common_externals.current_field_id = (WORD*)get_absolute_value(ff7_externals.sub_408074, 0x41); // 0xCC15D0
@@ -578,11 +593,11 @@ void ff7_find_externals(struct ff7_game_obj* game_object)
 
 	ff7_externals.field_level_data_pointer = (byte**)get_absolute_value(ff7_externals.read_field_file, 0xB2); // 0xCFF594
 
-	ff7_externals.sub_408116 = get_relative_call(ff7_externals.sub_63C17F, 0x2A);
+	ff7_externals.sub_408116 = get_relative_call(ff7_externals.field_loop_sub_63C17F, 0x2A);
 	ff7_externals.word_CC16E8 = (char *)get_absolute_value(ff7_externals.sub_408116, 0x8E);
 	ff7_externals.current_triangle_id = (int16_t *)((char *)ff7_externals.word_CC16E8 + 136 * ff7_externals.modules_global_object->field_model_id);
 
-	ff7_externals.sub_6499F7 = get_relative_call(ff7_externals.sub_63C17F, 0x10C);
+	ff7_externals.sub_6499F7 = get_relative_call(ff7_externals.field_loop_sub_63C17F, 0x10C);
 	ff7_externals.input_ok_button_status = (DWORD*)get_absolute_value(ff7_externals.sub_6499F7, 0x60);
 	ff7_externals.input_run_button_status = (DWORD*)get_absolute_value(ff7_externals.sub_6499F7, 0x55);
 

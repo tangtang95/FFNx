@@ -98,6 +98,12 @@ std::array<uint32_t, 256> original_opcode_table {0};
 std::set<field_bank_address> field_bank_address_to_be_fixed = {{14, 6}};
 field_bank_address mvief_bank_address;
 
+vector2<float> bg_main_layer_pos = {-10000, -10000};
+float initial_offset_x = 0;
+float initial_offset_y = 0;
+float accurate_bg_pos_x = -10000;
+float accurate_bg_pos_y = -10000;
+
 int call_original_opcode_function(byte opcode)
 {
 	if(original_opcode_table[opcode])
@@ -178,22 +184,73 @@ void field_load_textures(struct ff7_game_obj *game_object, struct struc_3 *struc
 	*ff7_externals.layer2_end_page += 18;
 }
 
+void field_layer1_pick_tiles(short x_offset, short y_offset)
+{
+	int field_bg_multiplier = *ff7_externals.field_bg_multiplier;
+	vector2<float> offset, position_add, tile_position;
+	field_tile* layer1_tiles = *ff7_externals.field_layer1_tiles;
+
+	// ffnx_trace("bg_pos: (%d, %d), accurate: (%f, %f)\n", x_offset, y_offset, bg_main_layer_pos.x, bg_layer1_pos.y);
+
+	offset.x = x_offset;
+	offset.y = y_offset;
+	if(ff7_fps_limiter == FF7_LIMITER_60FPS)
+	{
+		if(bg_main_layer_pos.x != -10000 && bg_main_layer_pos.y != -10000)
+		{
+			offset.x = bg_main_layer_pos.x;
+			offset.y = bg_main_layer_pos.y;
+		}
+	}
+
+	position_add.x = field_bg_multiplier * (320 - offset.x);
+	position_add.y = field_bg_multiplier * (224 - offset.y);
+
+	if(*ff7_externals.field_special_y_offset > 0 && offset.y <= 6)
+		position_add.y -= field_bg_multiplier * (*ff7_externals.field_special_y_offset);
+
+
+	for(int i = 0; i < *ff7_externals.field_layer1_tiles_num; i++)
+	{
+		uint32_t tile_index = (*ff7_externals.field_layer1_palette_sort)[i];
+		layer1_tiles[tile_index].field_1044 = 1;
+
+		// Add all tiles even if they are not inside the screen space
+		tile_position.x = (position_add.x + field_bg_multiplier * layer1_tiles[tile_index].x);
+		tile_position.y = (position_add.y + field_bg_multiplier * layer1_tiles[tile_index].y);
+		ff7_externals.add_page_tile(tile_position.x, tile_position.y, 0.99970001, layer1_tiles[tile_index].u,
+									layer1_tiles[tile_index].v, layer1_tiles[tile_index].palette_index, layer1_tiles[tile_index].page);
+	}
+}
+
 void field_layer2_pick_tiles(short x_offset, short y_offset)
 {
 	int field_bg_multiplier = *ff7_externals.field_bg_multiplier;
-	int x_add = (320 - x_offset) * 2;
-	int y_add = ((ff7_center_fields ? 232 : 224) - y_offset) * field_bg_multiplier;
 	struct field_tile *layer2_tiles = *ff7_externals.field_layer2_tiles;
+	vector2<float> offset;
 
-	if(*ff7_externals.field_special_y_offset > 0 && y_offset <= 8)
-		y_add -= *ff7_externals.field_special_y_offset * field_bg_multiplier;
+	offset.x = x_offset;
+	offset.y = y_offset;
+	if(ff7_fps_limiter == FF7_LIMITER_60FPS)
+	{
+		if(bg_main_layer_pos.x != -10000 && bg_main_layer_pos.y != -10000)
+		{
+			offset.x = bg_main_layer_pos.x;
+			offset.y = bg_main_layer_pos.y;
+		}
+	}
+
+	float x_add = (320 - offset.x) * field_bg_multiplier;
+	float y_add = ((ff7_center_fields ? 232 : 224) - offset.y) * field_bg_multiplier;
+	if(*ff7_externals.field_special_y_offset > 0 && offset.y <= 8)
+		y_add -= (*ff7_externals.field_special_y_offset) * field_bg_multiplier;
 
 	for(int i = 0; i < *ff7_externals.field_layer2_tiles_num; i++)
 	{
 		uint32_t tile_index = (*ff7_externals.field_layer2_palette_sort)[i];
 		uint32_t page;
-		int x;
-		int y;
+		float x;
+		float y;
 
 		char anim_group = layer2_tiles[tile_index].anim_group;
 		if(anim_group && !(ff7_externals.modules_global_object->background_sprite_layer[anim_group] & layer2_tiles[tile_index].anim_bitmask))
@@ -210,7 +267,162 @@ void field_layer2_pick_tiles(short x_offset, short y_offset)
 		if(layer2_tiles[tile_index].use_fx_page && layer2_tiles[tile_index].blend_mode == 2) page += 14;
 		if(layer2_tiles[tile_index].use_fx_page && layer2_tiles[tile_index].blend_mode == 3) page += 18;
 
-		ff7_externals.add_page_tile((float)x, (float)y, layer2_tiles[tile_index].z, layer2_tiles[tile_index].u, layer2_tiles[tile_index].v, layer2_tiles[tile_index].palette_index, page);
+		ff7_externals.add_page_tile(x, y, layer2_tiles[tile_index].z, layer2_tiles[tile_index].u, layer2_tiles[tile_index].v, layer2_tiles[tile_index].palette_index, page);
+	}
+}
+
+// void ff7_sub_661B23(int x, int y)
+// {
+// 	ff7_externals.sub_661B23();
+// 	ff7_game_obj* game_obj = (ff7_game_obj*)common_externals.get_game_object();
+// 	if(game_obj)
+// 	{
+// 		*(float*)&game_obj->field_9A8 = accurate_bg_pos_x;
+// 		*(float*)&game_obj->field_9AC = accurate_bg_pos_y;
+// 	}
+// }
+
+// void ff7_field_draw_set_global_position_sub_640EB7()
+// {
+// 	vector2<float> global_position;
+
+// 	ff7_field_sub_661B68(global_position.x, global_position.y);
+// }
+
+ff7_game_obj* ff7_draw_background(float param_1, float param_2, float param_3, float bg_pos_x, float bg_pos_y, float res_width, float res_height, ff7_game_obj* game_object)
+{
+	if(getmode()->driver_mode == MODE_FIELD)
+	{
+		if(accurate_bg_pos_x != -10000 && accurate_bg_pos_y != -10000)
+		{
+			//ffnx_trace("bg_pos: (%f, %f), accurate: (%f, %f)\n", bg_pos_x, bg_pos_y, accurate_bg_pos_x, accurate_bg_pos_y);
+			bg_pos_x = accurate_bg_pos_x;
+			bg_pos_y = accurate_bg_pos_y;
+
+		}
+	}
+	return ((ff7_game_obj*(*)(float, float, float, float, float, float, float, ff7_game_obj*))0x67CCDE)(param_1, param_2, param_3, bg_pos_x, bg_pos_y, res_width, res_height, game_object);
+}
+
+void float_sub_643628(field_trigger_header *trigger_header, vector2<float> *delta_position)
+{
+	float temp_square_value, temp_1;
+	float diff_top_bottom, diff_right_left, diff_bottom_top;
+
+	if (trigger_header->field_14[0] == 1)
+	{
+		diff_top_bottom = trigger_header->camera_range.top - trigger_header->camera_range.bottom;
+		diff_right_left = trigger_header->camera_range.right - trigger_header->camera_range.left;
+		temp_1 = -(diff_top_bottom * (trigger_header->camera_range.bottom + 120 - delta_position->y) + diff_right_left * (trigger_header->camera_range.left + 160 - delta_position->x));
+		temp_square_value = (diff_top_bottom * diff_top_bottom + diff_right_left * diff_right_left) / 256.0;
+		delta_position->x = ((diff_right_left * temp_1 / temp_square_value) / 256.0) + trigger_header->camera_range.left + 160;
+		delta_position->y = ((diff_top_bottom * temp_1 / temp_square_value) / 256.0) + trigger_header->camera_range.bottom + 120;
+	}
+	if (trigger_header->field_14[0] == 2)
+	{
+		diff_bottom_top = trigger_header->camera_range.bottom - trigger_header->camera_range.top;
+		diff_right_left = trigger_header->camera_range.right - trigger_header->camera_range.left;
+		temp_1 = -((diff_bottom_top) * (trigger_header->camera_range.top - 120 - delta_position->y) + diff_right_left * (trigger_header->camera_range.left + 160 - delta_position->x));
+		temp_square_value = (diff_bottom_top * diff_bottom_top + diff_right_left * diff_right_left) / 256.0;
+		delta_position->x = ((diff_right_left * temp_1 / temp_square_value) / 256.0) + trigger_header->camera_range.left + 160;
+		delta_position->y = ((diff_bottom_top * temp_1 / temp_square_value) / 256.0) + trigger_header->camera_range.top - 120;
+	}
+}
+
+int float_sub_66307D(vector3<float> *point, vector2<float> *delta_position, int *a3, int *a4)
+{
+	int one_four_of_camera_pos_z;
+	float field_camera_float[16];
+	vector3<float> camera_position;
+	vector3<float> position;
+	byte* global_camera_data = *(byte**)0x90AAF0;
+
+	((void(*)(short*, float*))(0x661465))((short*)&global_camera_data[16], field_camera_float);
+	((void(*)(float*, vector3<float>*, vector3<float>*))0x66CF7E)(field_camera_float, point, &position);
+	camera_position.x = (double)*(int*)&global_camera_data[34] + position.x;
+	camera_position.y = (double)*(int*)&global_camera_data[38] + position.y;
+	camera_position.z = (double)*(int*)&global_camera_data[42] + position.z;
+	if (camera_position.z == 0.0)
+	{
+		one_four_of_camera_pos_z = 0;
+	}
+	else
+	{
+		delta_position->x = (camera_position.x * (*(float*)global_camera_data) / camera_position.z + (*(float*)&global_camera_data[56]));
+		delta_position->y = (camera_position.y * (*(float*)global_camera_data) / camera_position.z + (*(float*)&global_camera_data[60]));
+		one_four_of_camera_pos_z = (camera_position.z * 0.25);
+	}
+	*a3 = 0;
+	*a4 = 0;
+	return one_four_of_camera_pos_z;
+}
+
+int float_sub_64314F(vector3<float> *point, vector2<float> *bg_delta_position)
+{
+	int v3;
+	int v4;
+	int v5;
+
+	((void(*)(ff7_field_camera*))0x663673)(ff7_externals.field_camera_CFF3D8);
+	((void(*)(ff7_field_camera*))0x663707)(ff7_externals.field_camera_CFF3D8);
+	((void(*)(int, int))0x661976)(*(int*)0xCFF204, *(int*)0xCFF208);
+	v4 = float_sub_66307D(point, bg_delta_position, &v5, &v3);
+	((void(*)(int, int))0x661976)(*(int*)0xCFF1F4, *(int*)0xCFF1F8);
+	return v4;
+}
+
+void update_background_smooth()
+{
+	field_trigger_header* field_triggers_header_ptr = *ff7_externals.field_triggers_header;
+	field_event_data* field_event_data_ptr = *ff7_externals.field_event_data_ptr;
+	vector2<float> delta_position;
+	vector3<float> player_position;
+	int field_bg_multiplier = *ff7_externals.field_bg_multiplier;
+
+	player_position.x = field_event_data_ptr[*(WORD*)0xCC162C].model_pos.x / 4096.0;
+	player_position.y = field_event_data_ptr[*(WORD*)0xCC162C].model_pos.y / 4096.0;
+	player_position.z = ff7_externals.modules_global_object->field_16 + (field_event_data_ptr[*(WORD*)0xCC162C].model_pos.z / 4096.0);
+	float_sub_64314F(&player_position, &delta_position);
+	delta_position.x = delta_position.x - (*(short*)0xCFF204);
+	delta_position.y = delta_position.y - (*(short*)0xCFF208);
+	if (delta_position.x > field_triggers_header_ptr->camera_range.right - 160)
+		delta_position.x = field_triggers_header_ptr->camera_range.right - 160;
+	if (delta_position.x < field_triggers_header_ptr->camera_range.left + 160)
+		delta_position.x = field_triggers_header_ptr->camera_range.left + 160;
+	if (delta_position.y > field_triggers_header_ptr->camera_range.top - 120)
+		delta_position.y = field_triggers_header_ptr->camera_range.top - 120;
+	if (delta_position.y < field_triggers_header_ptr->camera_range.bottom + 120)
+		delta_position.y = field_triggers_header_ptr->camera_range.bottom + 120;
+	float_sub_643628(field_triggers_header_ptr, &delta_position);
+
+	// Round to about 3 decimal position
+	delta_position.x = round(delta_position.x * 10000) / 10000.f;
+	delta_position.y = round(delta_position.y * 10000) / 10000.f;
+
+	accurate_bg_pos_x = (ff7_externals.modules_global_object->shake_bg_x.shake_curr_value + *(int*)0xCC1608 - delta_position.x - 160) * field_bg_multiplier;
+	accurate_bg_pos_y = (ff7_externals.modules_global_object->shake_bg_y.shake_curr_value + *(int*)0xCC160C - delta_position.y - 120) * field_bg_multiplier;
+	bg_main_layer_pos.x = delta_position.x + 320 - *(int*)0xCC1608  - ff7_externals.modules_global_object->shake_bg_x.shake_curr_value;
+	bg_main_layer_pos.y = delta_position.y + 232 - *(int*)0xCC160C - ff7_externals.modules_global_object->shake_bg_y.shake_curr_value;
+}
+
+void ff7_field_update_background()
+{
+	ff7_externals.field_update_background_positions();
+
+	if ( ff7_externals.word_CC1638 && !ff7_externals.modules_global_object->BGMOVIE_flag)
+	{
+		update_background_smooth();
+	}
+	else if(*ff7_externals.field_bg_flag_CC15E4)
+	{
+		accurate_bg_pos_x = *(short*)0xCFF568;
+		accurate_bg_pos_y = *(short*)0xCFF56C;
+		bg_main_layer_pos.x = *(short*)0xCC1610;
+		bg_main_layer_pos.y = *(short*)0xCC1614;
+	}
+	else
+	{
+		update_background_smooth();
 	}
 }
 
@@ -695,7 +907,7 @@ void ff7_field_hook_init()
 	replace_call_function(ff7_externals.field_sub_60DCED + 0x178, ff7_field_initialize_variables);
 
 	// Model movement (walk, run) fps fix + allow footstep sfx
-	replace_call_function(ff7_externals.sub_63C17F + 0x5DD, ff7_field_update_models_position);
+	replace_call_function(ff7_externals.field_loop_sub_63C17F + 0x5DD, ff7_field_update_models_position);
 	replace_call_function(ff7_externals.field_update_models_positions + 0x8BC, ff7_field_update_player_model_position);
 	replace_call_function(ff7_externals.field_update_models_positions + 0x9E8, ff7_field_update_single_model_position);
 	replace_call_function(ff7_externals.field_update_models_positions + 0x9AA, ff7_field_check_collision_with_target);
@@ -737,6 +949,8 @@ void ff7_field_hook_init()
 	replace_call_function(common_externals.execute_opcode_table[BGSCR] + 0x68, ff7_opcode_divide_get_bank_value);
 	replace_call_function(common_externals.execute_opcode_table[BGSCR] + 0x81, ff7_opcode_divide_get_bank_value);
 	replace_function(ff7_externals.opcode_shake, ff7_opcode_script_SHAKE);
+	replace_call_function(0x661BDA, ff7_draw_background);
+	replace_call_function(ff7_externals.field_loop_sub_63C17F + 0x1A6, ff7_field_update_background);
 
 	// Camera fps fix
 	replace_call_function(common_externals.execute_opcode_table[SCRLC] + 0x3B, ff7_opcode_multiply_get_bank_value);
