@@ -530,7 +530,20 @@ void ff7_find_externals(struct ff7_game_obj* game_object)
 	ff7_externals.word_CC0DD4 = (WORD*)get_absolute_value(ff7_externals.enter_field, 0x124);
 	ff7_externals.word_CC1638 = (WORD*)get_absolute_value(ff7_externals.sub_40B27B, 0x25);
 	ff7_externals.field_update_background_positions = (void (*)())get_relative_call(ff7_externals.field_loop_sub_63C17F, 0x1A6);
+	ff7_externals.field_sub_64314F = get_relative_call((uint32_t)ff7_externals.field_update_background_positions, 0x288);
+	ff7_externals.engine_sub_661976 = (void (*)(int, int))get_relative_call(ff7_externals.field_sub_64314F, 0x2D);
+	ff7_externals.engine_sub_66307D = get_relative_call(ff7_externals.field_sub_64314F, 0x45);
+	ff7_externals.engine_sub_661465 = (void (*)(short*, float*))get_relative_call(ff7_externals.engine_sub_66307D, 0x23);
+	ff7_externals.engine_sub_66CF7E = (void (*)(float*, vector3<float>*, vector3<float>*))get_relative_call(ff7_externals.engine_sub_66307D, 0x37);
+	ff7_externals.field_bg_offset = (vector2<int>*)get_absolute_value((uint32_t)ff7_externals.field_update_background_positions, 0x3E8);
+	ff7_externals.field_world_pos = (vector2<int>*)get_absolute_value((uint32_t)ff7_externals.field_update_background_positions, 0x403);
+	ff7_externals.field_vector2_CFF204 = (vector2<int>*)get_absolute_value((uint32_t)ff7_externals.field_sub_64314F, 0x28);
+	ff7_externals.field_vector2_CFF1F4 = (vector2<int>*)get_absolute_value((uint32_t)ff7_externals.field_sub_64314F, 0x58);
 	ff7_externals.field_bg_flag_CC15E4 = (WORD*)get_absolute_value((uint32_t)ff7_externals.field_update_background_positions, 0x129);
+	ff7_externals.field_sub_640EB7 = get_relative_call(ff7_externals.field_draw_everything, 0x34);
+	ff7_externals.field_sub_661B68 = get_relative_call(ff7_externals.field_sub_640EB7, 0x61);
+	ff7_externals.engine_sub_661B23 = (void (*)(int, int))get_relative_call(ff7_externals.field_sub_661B68, 0x1A);
+	ff7_externals.engine_sub_67CCDE = (void (*)(float, float, float, float, float, float, float, ff7_game_obj*))get_relative_call(ff7_externals.field_sub_661B68, 0x72);
 
 	ff7_externals.sfx_stop_channel_6 = get_relative_call(common_externals.sfx_cleanup, 0x16);
 	ff7_externals.sfx_stop_channel_timer_handle = (UINT *)get_absolute_value(ff7_externals.sfx_stop_channel_6, 0x5);
@@ -952,8 +965,8 @@ void ff7_find_externals(struct ff7_game_obj* game_object)
 	ff7_externals.run_kotr_camera_476AFB = get_absolute_value((uint32_t)ff7_externals.add_kotr_camera_fn_to_effect100_fn_476AAB, 0xA);
 
 	ff7_externals.battle_sub_661000 = (vector3<int>*(*)(int))get_relative_call(ff7_externals.run_ifrit_movement_596702, 0x38);
-	ff7_externals.battle_sub_663673 = (void(*)(WORD*))get_relative_call(ff7_externals.run_ifrit_movement_596702, 0x169);
-	ff7_externals.battle_sub_663707 = (void(*)(DWORD*))get_relative_call(ff7_externals.run_ifrit_movement_596702, 0x176);
+	ff7_externals.engine_sub_663673 = (void(*)(WORD*))get_relative_call(ff7_externals.run_ifrit_movement_596702, 0x169);
+	ff7_externals.engine_sub_663707 = (void(*)(DWORD*))get_relative_call(ff7_externals.run_ifrit_movement_596702, 0x176);
 	ff7_externals.battle_sub_662ECC = (void(*)(vector3<short>*, vector3<int>*, int*))get_relative_call(ff7_externals.run_ifrit_movement_596702, 0x193);
 	ff7_externals.byte_BCC788 = (byte*)get_absolute_value(ff7_externals.run_ifrit_movement_596702, 0x1C);
 	ff7_externals.vector3_int_ptr_BCC6A8 = (vector3<int>**)get_absolute_value(ff7_externals.run_ifrit_movement_596702, 0x41);
