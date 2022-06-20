@@ -317,12 +317,20 @@ void ff7_find_externals(struct ff7_game_obj* game_object)
 	ff7_externals.field_layer3_tiles_num = (uint32_t *)get_absolute_value(ff7_externals.field_layer3_pick_tiles, 0xAB);
 	ff7_externals.field_layer3_palette_sort = (uint32_t **)get_absolute_value(ff7_externals.field_layer3_pick_tiles, 0xC1);
 	ff7_externals.field_layer3_tiles = (field_tile **)get_absolute_value(ff7_externals.field_layer3_pick_tiles, 0xDD);
+	ff7_externals.do_draw_layer3_CFFE3C = (int*)get_absolute_value(ff7_externals.field_layer3_pick_tiles, 0x9);
+	ff7_externals.field_layer3_flag_CFFE40 = (int*)get_absolute_value(ff7_externals.field_layer3_pick_tiles, 0x3B1);
+	ff7_externals.field_layer4_pick_tiles = get_relative_call(ff7_externals.field_pick_tiles_make_vertices, 0x5F);
+	ff7_externals.field_layer4_tiles_num = (uint32_t *)get_absolute_value(ff7_externals.field_layer4_pick_tiles, 0x90);
+	ff7_externals.field_layer4_palette_sort = (uint32_t **)get_absolute_value(ff7_externals.field_layer4_pick_tiles, 0xA6);
+	ff7_externals.field_layer4_tiles = (field_tile **)get_absolute_value(ff7_externals.field_layer4_pick_tiles, 0xC2);
+	ff7_externals.do_draw_layer4_CFFEA4 = (int*)get_absolute_value(ff7_externals.field_layer4_pick_tiles, 0x9);
+	ff7_externals.field_layer4_flag_CFFEA8 = (int*)get_absolute_value(ff7_externals.field_layer4_pick_tiles, 0x3F3);
+	ff7_externals.field_layer_sub_C23C0F = (double(*)(ff7_field_camera*, int, int, int))get_relative_call(ff7_externals.field_layer3_pick_tiles, 0x7E);
+	ff7_externals.field_layer_CFF1D8 = (int *)get_absolute_value(ff7_externals.field_layer4_pick_tiles, 0x264);
+	ff7_externals.field_palette_D00088 = (uint16_t *)get_absolute_value(ff7_externals.field_layer4_pick_tiles, 0x28A);
 	ff7_externals.field_special_y_offset = (uint32_t *)get_absolute_value(ff7_externals.field_layer2_pick_tiles, 0x43);
 	ff7_externals.field_bg_multiplier = (uint32_t *)get_absolute_value(ff7_externals.field_layer2_pick_tiles, 0x23);
 	ff7_externals.add_page_tile = (void (*)(float, float, float, float, float, uint32_t, uint32_t))get_relative_call(ff7_externals.field_layer2_pick_tiles, 0x327);
-	ff7_externals.do_draw_layer3_CFFE3C = (int*)get_absolute_value(ff7_externals.field_layer3_pick_tiles, 0x9);
-	ff7_externals.field_layer3_flag_CFFE40 = (int*)get_absolute_value(ff7_externals.field_layer3_pick_tiles, 0x3B1);
-	ff7_externals.layer3_sub_C23C0F = (double(*)(ff7_field_camera*, int, int, int))get_relative_call(ff7_externals.field_layer3_pick_tiles, 0x7E);
 	ff7_externals.field_triggers_header = (field_trigger_header**)get_absolute_value(ff7_externals.field_layer3_pick_tiles, 0x134);
 	ff7_externals.field_camera_CFF3D8 = (ff7_field_camera*)get_absolute_value(ff7_externals.field_layer3_pick_tiles, 0x7A);
 
