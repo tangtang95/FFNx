@@ -98,8 +98,9 @@ std::array<uint32_t, 256> original_opcode_table {0};
 std::set<field_bank_address> field_bank_address_to_be_fixed = {{14, 6}};
 field_bank_address mvief_bank_address;
 
-vector2<float> bg_main_layer_pos = {-10000, -10000};
-vector2<float> field_3d_world_pos = {-10000, -10000};
+constexpr float INVALID_VALUE = -1000000;
+vector2<float> bg_main_layer_pos = {INVALID_VALUE, INVALID_VALUE};
+vector2<float> field_3d_world_pos = {INVALID_VALUE, INVALID_VALUE};
 
 int call_original_opcode_function(byte opcode)
 {
@@ -191,7 +192,7 @@ void field_layer1_pick_tiles(short x_offset, short y_offset)
 	offset.y = y_offset;
 	if(ff7_fps_limiter >= FF7_LIMITER_30FPS)
 	{
-		if(bg_main_layer_pos.x != -10000 && bg_main_layer_pos.y != -10000)
+		if(bg_main_layer_pos.x != INVALID_VALUE && bg_main_layer_pos.y != INVALID_VALUE)
 		{
 			offset.x = bg_main_layer_pos.x;
 			offset.y = bg_main_layer_pos.y;
@@ -228,7 +229,7 @@ void field_layer2_pick_tiles(short x_offset, short y_offset)
 	offset.y = y_offset;
 	if(ff7_fps_limiter >= FF7_LIMITER_30FPS)
 	{
-		if(bg_main_layer_pos.x != -10000 && bg_main_layer_pos.y != -10000)
+		if(bg_main_layer_pos.x != INVALID_VALUE && bg_main_layer_pos.y != INVALID_VALUE)
 		{
 			offset.x = bg_main_layer_pos.x;
 			offset.y = bg_main_layer_pos.y;
@@ -274,7 +275,7 @@ void ff7_field_engine_sub_661B23(int field_world_x, int field_world_y)
 	{
 		if(ff7_fps_limiter >= FF7_LIMITER_30FPS)
 		{
-			if(field_3d_world_pos.x != -10000 && field_3d_world_pos.y != -10000)
+			if(field_3d_world_pos.x != INVALID_VALUE && field_3d_world_pos.y != INVALID_VALUE)
 			{
 				*(float*)&game_obj->field_9A8 = field_3d_world_pos.x;
 				*(float*)&game_obj->field_9AC = field_3d_world_pos.y;
@@ -296,7 +297,12 @@ void ff7_field_sub_661B68(int field_world_x, int field_world_y)
 
 void ff7_field_set_world_position_sub_640EB7()
 {
-	ff7_field_sub_661B68((*ff7_externals.field_bg_multiplier) * ff7_externals.field_world_pos->x, (*ff7_externals.field_bg_multiplier) * ff7_externals.field_world_pos->y);
+	if(field_3d_world_pos.x != INVALID_VALUE || *ff7_externals.field_world_pos_x != *ff7_externals.field_prev_world_pos_x || *ff7_externals.field_world_pos_y != *ff7_externals.field_prev_world_pos_y)
+	{
+		*ff7_externals.field_prev_world_pos_x = *ff7_externals.field_world_pos_x;
+		*ff7_externals.field_prev_world_pos_y = *ff7_externals.field_world_pos_y;
+		ff7_field_sub_661B68((*ff7_externals.field_bg_multiplier) * (*ff7_externals.field_world_pos_x), (*ff7_externals.field_bg_multiplier) * (*ff7_externals.field_world_pos_y));
+	}
 }
 
 void float_sub_643628(field_trigger_header *trigger_header, vector2<float> *delta_position)
@@ -371,15 +377,12 @@ void ff7_field_update_background()
 
 	if ( *ff7_externals.word_CC1638 && !ff7_externals.modules_global_object->BGMOVIE_flag)
 	{
-		field_3d_world_pos.x = -10000;
-		field_3d_world_pos.y = -10000;
+		field_3d_world_pos = {INVALID_VALUE, INVALID_VALUE};
 	}
 	else if(*ff7_externals.field_bg_flag_CC15E4)
 	{
-		field_3d_world_pos.x = -10000;
-		field_3d_world_pos.y = -10000;
-		bg_main_layer_pos.x = -10000;
-		bg_main_layer_pos.y = -10000;
+		field_3d_world_pos = {INVALID_VALUE, INVALID_VALUE};
+		bg_main_layer_pos = {INVALID_VALUE, INVALID_VALUE};
 	}
 	else
 	{
@@ -407,7 +410,7 @@ void ff7_field_update_background()
 
 		field_3d_world_pos.x = (ff7_externals.modules_global_object->shake_bg_x.shake_curr_value + ff7_externals.field_bg_offset->x - delta_position.x - 160) * field_bg_multiplier;
 		field_3d_world_pos.y = (ff7_externals.modules_global_object->shake_bg_y.shake_curr_value + ff7_externals.field_bg_offset->y - delta_position.y - 120) * field_bg_multiplier;
-		bg_main_layer_pos.x = delta_position.x + 320 - ff7_externals.field_bg_offset->x  - ff7_externals.modules_global_object->shake_bg_x.shake_curr_value;
+		bg_main_layer_pos.x = delta_position.x + 320 - ff7_externals.field_bg_offset->x - ff7_externals.modules_global_object->shake_bg_x.shake_curr_value;
 		bg_main_layer_pos.y = delta_position.y + 232 - ff7_externals.field_bg_offset->y - ff7_externals.modules_global_object->shake_bg_y.shake_curr_value;
 	}
 }
@@ -468,6 +471,9 @@ int get_frame_multiplier()
 void ff7_field_initialize_variables()
 {
 	((void(*)())ff7_externals.field_initialize_variables)();
+
+	bg_main_layer_pos = {INVALID_VALUE, INVALID_VALUE};
+	field_3d_world_pos = {INVALID_VALUE, INVALID_VALUE};
 
 	// reset movement frame index for all models
 	for(auto &external_data : external_model_data){

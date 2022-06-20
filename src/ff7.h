@@ -2525,7 +2525,10 @@ struct ff7_externals
 	void (*engine_sub_661465)(short*, float*);
 	void (*engine_sub_66CF7E)(float*, vector3<float>*, vector3<float>*);
 	vector2<int>* field_bg_offset;
-	vector2<int>* field_world_pos;
+	short* field_world_pos_x;
+	short* field_world_pos_y;
+	short* field_prev_world_pos_x;
+	short* field_prev_world_pos_y;
 	vector2<int>* field_vector2_CFF204;
 	vector2<int>* field_vector2_CFF1F4;
 	WORD* field_bg_flag_CC15E4;
