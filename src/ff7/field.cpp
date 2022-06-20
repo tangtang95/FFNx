@@ -324,9 +324,9 @@ void float_sub_643628(field_trigger_header *trigger_header, vector2<float> *delt
 		diff_bottom_top = trigger_header->camera_range.bottom + 120 - (trigger_header->camera_range.top - 120);
 		diff_right_left = trigger_header->camera_range.right - 160 - (trigger_header->camera_range.left + 160);
 		temp_1 = -((diff_bottom_top) * (trigger_header->camera_range.top - 120 - delta_position->y) + diff_right_left * (trigger_header->camera_range.left + 160 - delta_position->x));
-		temp_square_value = (diff_bottom_top * diff_bottom_top + diff_right_left * diff_right_left) / 256.0;
-		delta_position->x = ((diff_right_left * temp_1 / temp_square_value) / 256.0) + trigger_header->camera_range.left + 160;
-		delta_position->y = ((diff_bottom_top * temp_1 / temp_square_value) / 256.0) + trigger_header->camera_range.top - 120;
+		temp_square_value = (diff_bottom_top * diff_bottom_top + diff_right_left * diff_right_left) / 256.f;
+		delta_position->x = ((diff_right_left * temp_1 / temp_square_value) / 256.f) + trigger_header->camera_range.left + 160;
+		delta_position->y = ((diff_bottom_top * temp_1 / temp_square_value) / 256.f) + trigger_header->camera_range.top - 120;
 	}
 }
 
@@ -351,7 +351,7 @@ int float_sub_66307D(vector3<float> *point, vector2<float> *delta_position, int 
 	{
 		delta_position->x = (camera_position.x * (*(float*)global_game_data) / camera_position.z + (*(float*)&global_game_data[56]));
 		delta_position->y = (camera_position.y * (*(float*)global_game_data) / camera_position.z + (*(float*)&global_game_data[60]));
-		camera_pos_z = (camera_position.z * 0.25);
+		camera_pos_z = (camera_position.z * 0.25f);
 	}
 	*param_3 = 0;
 	*param_4 = 0;
