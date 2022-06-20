@@ -1964,7 +1964,7 @@ struct ff7_modules_global_object
   uint8_t field_13;
   uint8_t field_14;
   uint8_t field_15;
-  uint16_t field_16;
+  short field_16;
   uint16_t field_18;
   uint16_t field_1A;
   uint8_t field_1C;

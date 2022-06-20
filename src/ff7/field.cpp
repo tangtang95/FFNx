@@ -270,6 +270,8 @@ void field_layer2_pick_tiles(short x_offset, short y_offset)
 void ff7_field_engine_sub_661B23(int field_world_x, int field_world_y)
 {
 	ff7_externals.engine_sub_661B23(field_world_x, field_world_y);
+
+	// Override field_9A8 and field_9AC values with accurate field 3d world position
 	ff7_game_obj* game_obj = (ff7_game_obj*)common_externals.get_game_object();
 	if(game_obj)
 	{
@@ -307,58 +309,55 @@ void ff7_field_set_world_position_sub_640EB7()
 
 void float_sub_643628(field_trigger_header *trigger_header, vector2<float> *delta_position)
 {
-	float temp_square_value, temp_1;
-	float diff_top_bottom, diff_right_left, diff_bottom_top;
-
 	if (trigger_header->field_14[0] == 1)
 	{
-		diff_top_bottom = trigger_header->camera_range.top - 120 - (trigger_header->camera_range.bottom + 120);
-		diff_right_left = trigger_header->camera_range.right - 160 - (trigger_header->camera_range.left + 160);
-		temp_1 = -(diff_top_bottom * (trigger_header->camera_range.bottom + 120 - delta_position->y) + diff_right_left * (trigger_header->camera_range.left + 160 - delta_position->x));
-		temp_square_value = (diff_top_bottom * diff_top_bottom + diff_right_left * diff_right_left) / 256.f;
+		float diff_top_bottom = trigger_header->camera_range.top - 120 - (trigger_header->camera_range.bottom + 120);
+		float diff_right_left = trigger_header->camera_range.right - 160 - (trigger_header->camera_range.left + 160);
+		float temp_1 = -(diff_top_bottom * (trigger_header->camera_range.bottom + 120 - delta_position->y) + diff_right_left * (trigger_header->camera_range.left + 160 - delta_position->x));
+		float temp_square_value = (diff_top_bottom * diff_top_bottom + diff_right_left * diff_right_left) / 256.f;
 		delta_position->x = ((diff_right_left * temp_1 / temp_square_value) / 256.f) + trigger_header->camera_range.left + 160;
 		delta_position->y = ((diff_top_bottom * temp_1 / temp_square_value) / 256.f) + trigger_header->camera_range.bottom + 120;
 	}
 	if (trigger_header->field_14[0] == 2)
 	{
-		diff_bottom_top = trigger_header->camera_range.bottom + 120 - (trigger_header->camera_range.top - 120);
-		diff_right_left = trigger_header->camera_range.right - 160 - (trigger_header->camera_range.left + 160);
-		temp_1 = -((diff_bottom_top) * (trigger_header->camera_range.top - 120 - delta_position->y) + diff_right_left * (trigger_header->camera_range.left + 160 - delta_position->x));
-		temp_square_value = (diff_bottom_top * diff_bottom_top + diff_right_left * diff_right_left) / 256.f;
+		float diff_bottom_top = trigger_header->camera_range.bottom + 120 - (trigger_header->camera_range.top - 120);
+		float diff_right_left = trigger_header->camera_range.right - 160 - (trigger_header->camera_range.left + 160);
+		float temp_1 = -((diff_bottom_top) * (trigger_header->camera_range.top - 120 - delta_position->y) + diff_right_left * (trigger_header->camera_range.left + 160 - delta_position->x));
+		float temp_square_value = (diff_bottom_top * diff_bottom_top + diff_right_left * diff_right_left) / 256.f;
 		delta_position->x = ((diff_right_left * temp_1 / temp_square_value) / 256.f) + trigger_header->camera_range.left + 160;
 		delta_position->y = ((diff_bottom_top * temp_1 / temp_square_value) / 256.f) + trigger_header->camera_range.top - 120;
 	}
 }
 
-int float_sub_66307D(vector3<float> *point, vector2<float> *delta_position, int *param_3, int *param_4)
+int float_sub_66307D(vector3<float> *position, vector2<float> *delta_position, int *param_3, int *param_4)
 {
-	int camera_pos_z;
-	float field_camera_float[16];
-	vector3<float> camera_position;
-	vector3<float> position;
+	int z_value;
+	float matrix[16];
+	vector3<float> temp_point, temp_point_1;
+	vector3<float> position_copy = *position;
 	byte* global_game_data = *(byte**)ff7_externals.global_game_data_90AAF0;
 
-	ff7_externals.engine_sub_661465((short*)&global_game_data[16], field_camera_float);
-	ff7_externals.engine_sub_66CF7E(field_camera_float, point, &position);
-	camera_position.x = (double)*(int*)&global_game_data[34] + position.x;
-	camera_position.y = (double)*(int*)&global_game_data[38] + position.y;
-	camera_position.z = (double)*(int*)&global_game_data[42] + position.z;
-	if (camera_position.z == 0.0)
+	ff7_externals.engine_sub_661465((short*)&global_game_data[16], matrix);
+	ff7_externals.engine_sub_66CF7E(matrix, &position_copy, &temp_point);
+	temp_point_1.x = (double)*(int*)&global_game_data[34] + temp_point.x;
+	temp_point_1.y = (double)*(int*)&global_game_data[38] + temp_point.y;
+	temp_point_1.z = (double)*(int*)&global_game_data[42] + temp_point.z;
+	if (temp_point_1.z == 0.f)
 	{
-		camera_pos_z = 0;
+		z_value = 0;
 	}
 	else
 	{
-		delta_position->x = (camera_position.x * (*(float*)global_game_data) / camera_position.z + (*(float*)&global_game_data[56]));
-		delta_position->y = (camera_position.y * (*(float*)global_game_data) / camera_position.z + (*(float*)&global_game_data[60]));
-		camera_pos_z = (camera_position.z * 0.25f);
+		delta_position->x = (temp_point_1.x * (*(float*)global_game_data) / temp_point_1.z + (*(float*)&global_game_data[56]));
+		delta_position->y = (temp_point_1.y * (*(float*)global_game_data) / temp_point_1.z + (*(float*)&global_game_data[60]));
+		z_value = (temp_point_1.z * 0.25f);
 	}
 	*param_3 = 0;
 	*param_4 = 0;
-	return camera_pos_z;
+	return z_value;
 }
 
-int float_sub_64314F(vector3<float> *point, vector2<float> *bg_delta_position)
+int float_sub_64314F(vector3<float> *position, vector2<float> *bg_delta_position)
 {
 	int dummy_1, dummy_2;
 	int camera_pos_z;
@@ -366,7 +365,7 @@ int float_sub_64314F(vector3<float> *point, vector2<float> *bg_delta_position)
 	ff7_externals.engine_sub_663673((WORD*)ff7_externals.field_camera_CFF3D8);
 	ff7_externals.engine_sub_663707((DWORD*)ff7_externals.field_camera_CFF3D8);
 	ff7_externals.engine_sub_661976(ff7_externals.field_vector2_CFF204->x, ff7_externals.field_vector2_CFF204->y);
-	camera_pos_z = float_sub_66307D(point, bg_delta_position, &dummy_1, &dummy_2);
+	camera_pos_z = float_sub_66307D(position, bg_delta_position, &dummy_1, &dummy_2);
 	ff7_externals.engine_sub_661976(ff7_externals.field_vector2_CFF1F4->x, ff7_externals.field_vector2_CFF1F4->y);
 	return camera_pos_z;
 }
@@ -388,30 +387,30 @@ void ff7_field_update_background()
 	{
 		field_trigger_header* field_triggers_header_ptr = *ff7_externals.field_triggers_header;
 		field_event_data* field_event_data_ptr = *ff7_externals.field_event_data_ptr;
-		vector2<float> delta_position;
+		vector2<float> bg_delta_position;
 		vector3<float> player_position;
 		int field_bg_multiplier = *ff7_externals.field_bg_multiplier;
 
-		player_position.x = field_event_data_ptr[*ff7_externals.field_player_model_id].model_pos.x / 4096.f;
-		player_position.y = field_event_data_ptr[*ff7_externals.field_player_model_id].model_pos.y / 4096.f;
-		player_position.z = ff7_externals.modules_global_object->field_16 + (field_event_data_ptr[*ff7_externals.field_player_model_id].model_pos.z / 4096.f);
-		float_sub_64314F(&player_position, &delta_position);
-		delta_position.x = delta_position.x - ff7_externals.field_vector2_CFF204->x;
-		delta_position.y = delta_position.y - ff7_externals.field_vector2_CFF204->y;
-		if (delta_position.x > field_triggers_header_ptr->camera_range.right - 160)
-			delta_position.x = field_triggers_header_ptr->camera_range.right - 160;
-		if (delta_position.x < field_triggers_header_ptr->camera_range.left + 160)
-			delta_position.x = field_triggers_header_ptr->camera_range.left + 160;
-		if (delta_position.y > field_triggers_header_ptr->camera_range.top - 120)
-			delta_position.y = field_triggers_header_ptr->camera_range.top - 120;
-		if (delta_position.y < field_triggers_header_ptr->camera_range.bottom + 120)
-			delta_position.y = field_triggers_header_ptr->camera_range.bottom + 120;
-		float_sub_643628(field_triggers_header_ptr, &delta_position);
+		player_position.x = field_event_data_ptr[*ff7_externals.field_player_model_id].model_pos.x >> 12;
+		player_position.y = field_event_data_ptr[*ff7_externals.field_player_model_id].model_pos.y >> 12;
+		player_position.z = ff7_externals.modules_global_object->field_16 + (field_event_data_ptr[*ff7_externals.field_player_model_id].model_pos.z >> 12);
+		float_sub_64314F(&player_position, &bg_delta_position);
+		bg_delta_position.x = bg_delta_position.x - ff7_externals.field_vector2_CFF204->x;
+		bg_delta_position.y = bg_delta_position.y - ff7_externals.field_vector2_CFF204->y;
+		if (bg_delta_position.x > field_triggers_header_ptr->camera_range.right - 160)
+			bg_delta_position.x = field_triggers_header_ptr->camera_range.right - 160;
+		if (bg_delta_position.x < field_triggers_header_ptr->camera_range.left + 160)
+			bg_delta_position.x = field_triggers_header_ptr->camera_range.left + 160;
+		if (bg_delta_position.y > field_triggers_header_ptr->camera_range.top - 120)
+			bg_delta_position.y = field_triggers_header_ptr->camera_range.top - 120;
+		if (bg_delta_position.y < field_triggers_header_ptr->camera_range.bottom + 120)
+			bg_delta_position.y = field_triggers_header_ptr->camera_range.bottom + 120;
+		float_sub_643628(field_triggers_header_ptr, &bg_delta_position);
 
-		field_3d_world_pos.x = (ff7_externals.modules_global_object->shake_bg_x.shake_curr_value + ff7_externals.field_bg_offset->x - delta_position.x - 160) * field_bg_multiplier;
-		field_3d_world_pos.y = (ff7_externals.modules_global_object->shake_bg_y.shake_curr_value + ff7_externals.field_bg_offset->y - delta_position.y - 120) * field_bg_multiplier;
-		bg_main_layer_pos.x = delta_position.x + 320 - ff7_externals.field_bg_offset->x - ff7_externals.modules_global_object->shake_bg_x.shake_curr_value;
-		bg_main_layer_pos.y = delta_position.y + 232 - ff7_externals.field_bg_offset->y - ff7_externals.modules_global_object->shake_bg_y.shake_curr_value;
+		field_3d_world_pos.x = (ff7_externals.modules_global_object->shake_bg_x.shake_curr_value + ff7_externals.field_bg_offset->x - bg_delta_position.x - 160) * field_bg_multiplier;
+		field_3d_world_pos.y = (ff7_externals.modules_global_object->shake_bg_y.shake_curr_value + ff7_externals.field_bg_offset->y - bg_delta_position.y - 120) * field_bg_multiplier;
+		bg_main_layer_pos.x = bg_delta_position.x + 320 - ff7_externals.field_bg_offset->x - ff7_externals.modules_global_object->shake_bg_x.shake_curr_value;
+		bg_main_layer_pos.y = bg_delta_position.y + 232 - ff7_externals.field_bg_offset->y - ff7_externals.modules_global_object->shake_bg_y.shake_curr_value;
 	}
 }
 
