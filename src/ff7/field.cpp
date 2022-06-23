@@ -32,6 +32,7 @@
 #include "../patch.h"
 #include "../sfx.h"
 #include "../movies.h"
+#include "field_scrolling_engine.h"
 #include "defs.h"
 #include <set>
 #include <cmath>
