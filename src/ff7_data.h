@@ -1118,6 +1118,8 @@ void ff7_find_externals(struct ff7_game_obj* game_object)
 	// Swirl externals
 	ff7_externals.swirl_main_loop = swirl_main_loop;
 	ff7_externals.swirl_loop_sub_4026D4 = get_relative_call(swirl_main_loop, 0xC9);
+	ff7_externals.swirl_enter_40164E = get_absolute_value(main_loop, 0x254);
+	ff7_externals.swirl_enter_sub_401810 = get_relative_call(ff7_externals.swirl_enter_40164E, 0x160);
 
 	// --------------------------------
 
@@ -1142,6 +1144,13 @@ void ff7_find_externals(struct ff7_game_obj* game_object)
 	ff7_externals.field_battle_word_BF2E08 = (WORD*)get_absolute_value(ff7_externals.update_display_text_queue, 0xA);
 	ff7_externals.field_battle_word_BF2032 = (WORD*)get_absolute_value(ff7_externals.update_display_text_queue, 0x12C);
 	ff7_externals.g_active_actor_id = (byte*)get_absolute_value(ff7_externals.display_battle_action_text_42782A, 0x52);
+	// --------------------------------
+
+	// Widescreen
+	ff7_externals.field_sub_6392BB = get_relative_call(field_main_loop, 0xF6);
+	ff7_externals.field_culling_model_639252 = get_relative_call(ff7_externals.field_sub_6392BB, 0x203);
+	ff7_externals.field_sub_63AC66 = get_relative_call(ff7_externals.sub_60DF96, 0xB0);
+	ff7_externals.field_sub_63AC3F = (void(*)(int, int, int, int))get_relative_call(ff7_externals.field_sub_63AC66, 0xD5);
 	// --------------------------------
 
 	// Steam achievement
