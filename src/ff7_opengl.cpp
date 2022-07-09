@@ -269,6 +269,21 @@ void ff7_init_hooks(struct game_obj *_game_object)
 		patch_code_dword(ff7_externals.battle_sub_58ACB9 + 0x65, (uint32_t)&viewport_x_widescreen_fix);
 		patch_code_dword(ff7_externals.display_battle_damage_5BB410 + 0x23F, (uint32_t)&viewport_x_widescreen_fix);
 		patch_code_dword(ff7_externals.display_battle_damage_5BB410 + 0x24C, (uint32_t)&viewport_x_widescreen_fix);
+
+		// Ifrit widescreen fix
+		// replace_function(ff7_externals.ifrit_sub_595A05, ifrit_wave_effect_sub_595A05);
+		replace_call_function(ff7_externals.ifrit_sub_595A05 + 0x930, ifrit_first_wave_effect_widescreen_fix_sub_66A47E);
+		replace_call_function(ff7_externals.ifrit_sub_595A05 + 0xAEC, ifrit_second_third_wave_effect_widescreen_fix_sub_66A47E);
+		replace_call_function(ff7_externals.ifrit_sub_595A05 + 0xCC0, ifrit_second_third_wave_effect_widescreen_fix_sub_66A47E);
+		replace_call_function(ff7_externals.ifrit_sub_595A05 + 0x38, ifrit_first_wave_effect_widescreen_calculation);
+		// memset_code(ff7_externals.ifrit_sub_595A05 + 0x3D, 0x90, 6);
+		// patch_code_byte(ff7_externals.ifrit_sub_595A05 + 0x46, 0);
+		// replace_call_function(ff7_externals.ifrit_sub_595A05 + 0x164, ifrit_second_wave_effect_widescreen_calculation);
+		// memset_code(ff7_externals.ifrit_sub_595A05 + 0x169, 0x90, 6);
+		// patch_code_byte(ff7_externals.ifrit_sub_595A05 + 0x172, 0);
+		// replace_call_function(ff7_externals.ifrit_sub_595A05 + 0x299, ifrit_third_wave_effect_widescreen_calculation);
+		// memset_code(ff7_externals.ifrit_sub_595A05 + 0x29E, 0x90, 6);
+		// patch_code_byte(ff7_externals.ifrit_sub_595A05 + 0x2A7, 0);
 	}
 
 	// #####################

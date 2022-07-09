@@ -131,3 +131,10 @@ struct ff7_tex_header *load_tex_file(struct file_context *file_context, char *fi
 int ff7_dsound_create(HWND hwnd, LPGUID guid);
 void ff7_dsound_release();
 int ff7_dsound_createsoundbuffer(const WAVEFORMATEX *waveFormatEx);
+
+// widescreen
+void ifrit_first_wave_effect_widescreen_fix_sub_66A47E(int wave_data_pointer);
+void ifrit_second_third_wave_effect_widescreen_fix_sub_66A47E(int wave_data_pointer);
+void ifrit_first_wave_effect_widescreen_calculation();
+void ifrit_second_wave_effect_widescreen_calculation();
+void ifrit_third_wave_effect_widescreen_calculation();
