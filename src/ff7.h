@@ -1956,8 +1956,8 @@ struct ff7_modules_global_object
   uint16_t field_model_pos_x;
   uint16_t field_model_pos_y;
   uint16_t field_8;
-  uint16_t field_A;
-  uint16_t field_C;
+  short field_A;
+  short field_C;
   uint16_t field_E;
   int16_t field_10;
   uint8_t field_12;
@@ -2531,6 +2531,7 @@ struct ff7_externals
 	uint32_t sub_40B27B;
 	WORD* word_CC0DD4;
 	WORD* word_CC1638;
+	uint32_t field_init_scripted_bg_movement;
 	uint32_t field_update_scripted_bg_movement;
 	void (*field_update_background_positions)();
 	uint32_t field_sub_64314F;
