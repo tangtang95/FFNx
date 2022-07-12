@@ -2946,6 +2946,12 @@ struct ff7_externals
 	world_event_data** world_event_current_entity_ptr_E39AD8;
 	world_event_data** world_event_current_entity_ptr_E3A7CC;
 	int* is_wait_frames_zero_E39BC0;
+	uint32_t world_draw_fade_quad_75551A;
+	uint32_t world_sub_75079D;
+	uint32_t world_sub_751EFC;
+	uint32_t world_culling_bg_meshes_75F263;
+	uint32_t world_compute_skybox_data_754100;
+	uint32_t world_submit_draw_clouds_and_meteor_7547A6;
 
 	uint32_t swirl_main_loop;
 	uint32_t swirl_loop_sub_4026D4;
