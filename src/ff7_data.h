@@ -1171,8 +1171,7 @@ void ff7_find_externals(struct ff7_game_obj* game_object)
 	// --------------------------------
 
 	// Widescreen
-	ff7_externals.field_sub_6392BB = get_relative_call(field_main_loop, 0xF6);
-	ff7_externals.field_culling_model_639252 = get_relative_call(ff7_externals.field_sub_6392BB, 0x203);
+	ff7_externals.field_culling_model_639252 = get_relative_call(ff7_externals.field_animate_3d_models_6392BB, 0x203);
 	ff7_externals.field_sub_63AC66 = get_relative_call(ff7_externals.sub_60DF96, 0xB0);
 	ff7_externals.field_sub_63AC3F = (void(*)(int, int, int, int))get_relative_call(ff7_externals.field_sub_63AC66, 0xD5);
 
