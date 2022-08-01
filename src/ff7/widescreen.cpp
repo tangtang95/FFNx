@@ -66,6 +66,8 @@ void ff7_widescreen_hook_init() {
     patch_code_dword(ff7_externals.battle_sub_5BD050 + 0x16A, (uint32_t)&wide_viewport_x);
     patch_code_dword(ff7_externals.battle_sub_5BD050 + 0x19F, (uint32_t)&wide_viewport_width);
     patch_code_dword(ff7_externals.battle_sub_5BD050 + 0x1BB, (uint32_t)&wide_viewport_x);
+    patch_code_int(ff7_externals.battle_enter + 0x1E8, 0);
+    patch_code_int(ff7_externals.battle_enter + 0x21A, wide_viewport_height);
     patch_code_dword(ff7_externals.battle_enter + 0x229, (uint32_t)&wide_viewport_width);
     patch_code_dword(ff7_externals.battle_enter + 0x22F, (uint32_t)&wide_viewport_x);
     patch_code_dword(ff7_externals.battle_draw_quad_5BD473 + 0xDA, (uint32_t)&wide_viewport_x);
@@ -76,6 +78,7 @@ void ff7_widescreen_hook_init() {
     patch_code_dword(ff7_externals.display_battle_damage_5BB410 + 0x24C, (uint32_t)&wide_viewport_x);
     patch_code_int(ff7_externals.shadow_flare_draw_white_bg_57747E + 0x18, wide_viewport_x);
     patch_code_int(ff7_externals.shadow_flare_draw_white_bg_57747E + 0x1F, wide_viewport_width / 2);
+    // Battle summon fix
     replace_call_function(ff7_externals.ifrit_sub_595A05 + 0x930, ifrit_first_wave_effect_widescreen_fix_sub_66A47E);
     replace_call_function(ff7_externals.ifrit_sub_595A05 + 0xAEC, ifrit_second_third_wave_effect_widescreen_fix_sub_66A47E);
     replace_call_function(ff7_externals.ifrit_sub_595A05 + 0xCC0, ifrit_second_third_wave_effect_widescreen_fix_sub_66A47E);
@@ -107,6 +110,16 @@ void ff7_widescreen_hook_init() {
     patch_code_dword(ff7_externals.barret_limit_3_1_sub_4700F7 + 0x36, (uint32_t)&wide_viewport_width);
     patch_code_dword(ff7_externals.fat_chocobo_sub_5096F3 + 0x4A, (uint32_t)&wide_viewport_x);
     patch_code_dword(ff7_externals.fat_chocobo_sub_5096F3 + 0x5F, (uint32_t)&wide_viewport_width);
+    // Battle fading animation fix
+    patch_code_short(ff7_externals.battle_sub_5BCF9D + 0x3A, 30);
+    patch_code_byte(ff7_externals.battle_sub_5BCF9D + 0x69, 120);
+    patch_code_byte(ff7_externals.battle_sub_5BD050 + 0x46, 72);
+    patch_code_byte(ff7_externals.battle_sub_5BD050 + 0xA5, 72);
+    patch_code_byte(ff7_externals.battle_sub_5BD050 + 0x87, 48);
+    patch_code_byte(ff7_externals.battle_sub_5BD050 + 0xDC, 48);
+    patch_code_byte(ff7_externals.battle_sub_5BD050 + 0x100, 48);
+    patch_code_byte(ff7_externals.battle_sub_5BD050 + 0x15C, 48);
+    patch_code_byte(ff7_externals.battle_sub_5BD050 + 0x186, 48);
 
     // Worldmap fix
     patch_code_dword(ff7_externals.world_draw_fade_quad_75551A + 0x12, (uint32_t)&wide_viewport_x);

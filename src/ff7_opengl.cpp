@@ -173,6 +173,12 @@ void ff7_init_hooks(struct game_obj *_game_object)
 	patch_code_byte(ff7_externals.coaster_sub_5EE150 + 0x190, 5);
 
 	// #####################
+	// widescreen
+	// #####################
+	if(aspect_ratio == AR_WIDESCREEN)
+		ff7_widescreen_hook_init();
+
+	// #####################
 	// new timer calibration
 	// #####################
 
@@ -229,12 +235,6 @@ void ff7_init_hooks(struct game_obj *_game_object)
 
 	// Field FPS fix (60FPS, 30FPS movies)
 	ff7_field_hook_init();
-
-	// #####################
-	// widescreen
-	// #####################
-	if(aspect_ratio == AR_WIDESCREEN)
-		ff7_widescreen_hook_init();
 
 	// #####################
 	// worldmap footsteps
