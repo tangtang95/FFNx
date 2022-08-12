@@ -377,22 +377,30 @@ void Renderer::renderFrame()
         y1    y3
     */
 
+    auto camera_range = widescreen.getCameraRange();
+    int hCameraRangeSize = camera_range.right - camera_range.left;
+    int zoomed_x = wide_viewport_width / 2 - hCameraRangeSize;
     // 0
     float x0 = framebufferVertexOffsetX;
     if (aspect_ratio == AR_STRETCH) x0 = 0.0f;
     float y0 = 0.0f;
     float u0 = 0.0f;
+    if (aspect_ratio == AR_WIDESCREEN && widescreen.isZoomEnabled()) u0 = abs(zoomed_x) / static_cast<float>(wide_viewport_width);
     float v0 = getCaps()->originBottomLeft ? 1.0f : 0.0f;
+    float vOffset = 240 - 9 * (camera_range.right - camera_range.left) / 16;
+    if (aspect_ratio == AR_WIDESCREEN && widescreen.isZoomEnabled()) v0 = getCaps()->originBottomLeft ? (480.0f-vOffset) / 480.0f : vOffset / 480.0f;
     // 1
     float x1 = x0;
     float y1 = game_height;
     float u1 = u0;
     float v1 = getCaps()->originBottomLeft ? 0.0f : 1.0f;
+    if (aspect_ratio == AR_WIDESCREEN && widescreen.isZoomEnabled()) v1 = getCaps()->originBottomLeft ? vOffset / 480.0f : (480.0f-vOffset) / 480.0f ;
     // 2
     float x2 = x0 + framebufferVertexWidth;
     if (aspect_ratio == AR_STRETCH) x2 = x0 + game_width;
     float y2 = y0;
     float u2 = 1.0f;
+    if (aspect_ratio == AR_WIDESCREEN && widescreen.isZoomEnabled()) u2 = (wide_viewport_width - zoomed_x - 1) / static_cast<float>(wide_viewport_width);
     float v2 = v0;
     // 3
     float x3 = x2;
@@ -1189,7 +1197,7 @@ void Renderer::setScissor(uint16_t x, uint16_t y, uint16_t width, uint16_t heigh
 
         // This sets a scissor offset for field with width not enough to fill the screen in 16:9
         field_trigger_header* field_triggers_header_ptr = *ff7_externals.field_triggers_header;
-        if(mode->driver_mode == MODE_FIELD && *ff7_externals.field_level_data_pointer != 0)
+        if(mode->driver_mode == MODE_FIELD && *ff7_externals.field_level_data_pointer != 0 && !widescreen.isZoomEnabled())
         {
             int cameraRange = (field_triggers_header_ptr->camera_range.right - field_triggers_header_ptr->camera_range.left);
             if(cameraRange < game_width / 2 + abs(wide_viewport_x))

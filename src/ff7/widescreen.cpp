@@ -24,11 +24,14 @@
 #include "widescreen.h"
 #include "../patch.h"
 #include "../ff7.h"
+#include "../cfg.h"
 #include "cmath"
 
 int viewport_width_plus_x_widescreen_fix = 750;
 int swirl_framebuffer_offset_x_widescreen_fix = 106;
 int swirl_framebuffer_offset_y_widescreen_fix = 64;
+
+Widescreen widescreen;
 
 void ifrit_first_wave_effect_widescreen_fix_sub_66A47E(int wave_data_pointer) {
 	int viewport_width_1_fix = ceil(255.f / game_width * wide_viewport_width) - 255;
@@ -230,4 +233,60 @@ void ff7_widescreen_hook_init() {
     patch_code_dword(ff7_externals.menu_submit_draw_fade_quad_6CD64E + 0x163, (uint32_t)&wide_viewport_x);
     patch_code_dword(ff7_externals.menu_submit_draw_fade_quad_6CD64E + 0x111, (uint32_t)&wide_viewport_width);
     patch_code_dword(ff7_externals.menu_submit_draw_fade_quad_6CD64E + 0x16F, (uint32_t)&wide_viewport_width);
+}
+
+void Widescreen::loadConfig()
+{
+	char _fullpath[MAX_PATH];
+	sprintf(_fullpath, "%s/%s/config.toml", basedir, external_widescreen_path.c_str());
+
+	try
+	{
+		config = toml::parse_file(_fullpath);
+	}
+	catch (const toml::parse_error &err)
+	{
+		config = toml::parse("");
+	}
+}
+
+void Widescreen::init()
+{
+    loadConfig();
+}
+
+void Widescreen::initParamsFromConfig()
+{
+    static WORD last_field_id = 0;
+
+    struct game_mode* mode = getmode_cached();
+    if (mode->driver_mode != MODE_FIELD) return;
+
+	if (last_field_id != *ff7_externals.field_id)
+	{
+		last_field_id = *ff7_externals.field_id;
+    }
+    else return;
+
+    auto pName = get_current_field_name();
+    if(pName == 0) return;
+
+    std::string _name(pName);
+    auto node = config[_name];
+    if(node)
+    {
+        camera_range.left = node["left"].value_or(0);
+        camera_range.right = node["right"].value_or(0);
+        camera_range.bottom = node["bottom"].value_or(0);
+        camera_range.top = node["top"].value_or(0);
+
+        zoom = node["zoom"].value_or(false);
+
+        if(zoom)
+        {
+            int verticalRangeOffset = 9 * (camera_range.right - camera_range.left) / 16 - 240;
+            camera_range.bottom -= verticalRangeOffset / 2;
+            camera_range.top += verticalRangeOffset / 2;
+        }
+    }
 }

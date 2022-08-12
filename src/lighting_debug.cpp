@@ -16,6 +16,7 @@
 #include "lighting_debug.h"
 #include "lighting.h"
 #include "cfg.h"
+#include "ff7/widescreen.h"
 
 #include <imgui.h>
 #include <math.h>
@@ -199,6 +200,10 @@ void lighting_debug(bool* isOpen)
         {
             lighting.setShowWalkmeshEnabled(isShowWalkmeshEnabled);
         }
+    }
+    if(ImGui::Button("Export widescreen config"))
+    {
+        widescreen.exportConfig();
     }
     ImGui::End();
 }

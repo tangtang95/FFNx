@@ -55,6 +55,8 @@
 #include "achievement.h"
 #include "game_cfg.h"
 
+#include "ff7/widescreen.h"
+
 #include "ff8/vram.h"
 #include "ff8/vibration.h"
 
@@ -836,6 +838,8 @@ int common_create_window(HINSTANCE hInstance, struct game_obj* game_object)
 					vibration_init();
 				}
 
+				widescreen.init();
+
 				// enable verbose logging for FFMpeg
 				av_log_set_level(AV_LOG_VERBOSE);
 				av_log_set_callback(ffmpeg_log_callback);
@@ -953,6 +957,8 @@ void common_flip(struct game_obj *game_object)
 	static uint32_t fps_counters[3] = {0, 0, 0};
 	time_t last_seconds = last_frame.time;
 	struct game_mode *mode = getmode_cached();
+
+	if(aspect_ratio == AR_WIDESCREEN) widescreen.initParamsFromConfig();
 
 	// Update RAM usage info
 	GlobalMemoryStatusEx(&last_ram_state);

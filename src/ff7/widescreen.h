@@ -23,6 +23,9 @@
 
 #pragma once
 
+#include "common.h"
+#include "globals.h"
+
 int wide_viewport_x = -106;
 int wide_viewport_y = 0;
 int wide_viewport_width = 854;
@@ -34,3 +37,36 @@ int wide_game_width = 960;
 int wide_game_height = 480;
 
 void ff7_widescreen_hook_init();
+
+class Widescreen
+{
+private:
+    // Config
+    toml::parse_result config;
+
+	field_camera_range camera_range;
+    bool zoom = false;
+private:
+    void loadConfig();
+public:
+    void init();
+    void initParamsFromConfig();
+
+    const field_camera_range& getCameraRange();
+    bool isZoomEnabled();
+};
+
+inline const field_camera_range& Widescreen::getCameraRange()
+{
+    return camera_range;
+}
+
+inline bool Widescreen::isZoomEnabled()
+{
+    struct game_mode* mode = getmode_cached();
+    if (mode->driver_mode != MODE_FIELD) return false;
+
+    return zoom;
+}
+
+extern Widescreen widescreen;
