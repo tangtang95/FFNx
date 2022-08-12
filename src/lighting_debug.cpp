@@ -203,7 +203,7 @@ void lighting_debug(bool* isOpen)
     }
     if(ImGui::Button("Export widescreen config"))
     {
-        widescreen.exportConfig();
+        //widescreen.exportConfig();
     }
     ImGui::End();
 }
