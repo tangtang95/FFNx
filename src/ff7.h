@@ -1006,6 +1006,24 @@ struct rotation_matrix
 #pragma pack(pop)
 
 #pragma pack(push, 1)
+struct transform_matrix
+{
+  int16_t eye_x;
+  int16_t eye_y;
+  int16_t eye_z;
+  int16_t target_x;
+  int16_t target_y;
+  int16_t target_z;
+  int16_t up_x;
+  int16_t up_y;
+  int16_t up_z;
+  int pos_x;
+  int pos_y;
+  int pos_z;
+};
+#pragma pack(pop)
+
+#pragma pack(push, 1)
 struct ff7_game_engine_data
 {
 	float scale;
@@ -2997,9 +3015,27 @@ struct ff7_externals
 	int (*world_get_player_walkmap_type)();
 	void(*world_sub_753D00)(vector3<short>*, short);
 	void(*world_update_model_movement_762E87)(int, int);
+	uint32_t world_update_camera_74E8CE;
+	int (*world_snowstorm_get_camera_movement_758B12)(int, int);
+	int (*world_get_camera_rotation_x_74F916)();
 	world_event_data** world_event_current_entity_ptr_E39AD8;
 	world_event_data** world_event_current_entity_ptr_E3A7CC;
 	int* is_wait_frames_zero_E39BC0;
+	int* world_prev_key_input_status_DFC470;
+	int* world_map_type_E045E8;
+	int* world_movement_multiplier_DFC480;
+	int* world_camera_var1_DF542C;
+	int* world_camera_var2_DE6B4C;
+	int* world_camera_viewtype_DFC4B4;
+	int* world_camera_front_DFC484;
+	int* world_camera_rotation_y_DFC474;
+	int* world_camera_position_z_DFC478;
+	int* world_camera_delta_y_DE6A04;
+	int* world_camera_rotation_z_DE6B70;
+	short* world_current_camera_rotation_x_DE7418;
+	std::span<short> world_camera_x_rotation_array_E37120;
+	rotation_matrix* world_camera_position_matrix_DE6A20;
+	rotation_matrix* world_camera_direction_matrix_DFC448;
 	uint32_t world_sub_75A1C6;
 	uint32_t world_sub_75A5D5;
 	uint32_t world_draw_fade_quad_75551A;

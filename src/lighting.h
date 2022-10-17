@@ -26,7 +26,16 @@
 #include "common.h"
 #include "globals.h"
 
+#include <bx/math.h>
+#include <bgfx/bgfx.h>
+
 #include <vector>
+#include <map>
+
+
+#define CGLTF_IMPLEMENTATION
+#include "cgltf/cgltf.h"
+
 
 enum DebugOutput
 {
@@ -39,6 +48,14 @@ enum DebugOutput
     DEBUG_OUTPUT_SPECULAR,
     DEBUG_OUTPUT_IBL_SPECULAR,
     DEBUG_OUTPUT_IBL_DIFFUSE,
+};
+
+struct Shape
+{
+    std::vector<nvertex> vertices;
+    std::vector<vector3<float>> normals;
+    std::vector<uint32_t> indices;
+    std::string baseColorTexName;
 };
 
 struct walkmeshEdge
@@ -59,6 +76,9 @@ struct LightingState
     float lightInvViewProjTexMatrix[16];
     float lightViewProjMatrix[16];
     float lightViewProjTexMatrix[16];
+
+    float viewOffsetMatrix[16];
+    float invViewOffsetMatrix[16];
 
     float lightingSettings[4] = { 1.0, 1.0, 1.0, 0.0 };
     float lightDirData[4] = { 0.3, -1.0, -0.3, 0.0 };
@@ -96,6 +116,9 @@ class Lighting
 private:
     LightingState lightingState;
 
+    std::vector<Shape> shapes;
+	std::map<std::string, bgfx::TextureHandle> textures;
+
     // Config
     toml::parse_result config;
 
@@ -121,6 +144,9 @@ public:
     void init();
 
     void draw(struct game_obj* game_object);
+    bool is3dField();
+    bool load3dWm();
+    bool draw3dWm();
 
     const LightingState& getLightingState();
 
@@ -196,8 +222,14 @@ public:
     bool isShowWalkmeshEnabled();
     void setDebugOutput(DebugOutput output);
     DebugOutput GetDebugOutput();
+    bool import3DMeshGltfFile(char* file_path, char* tex_path, std::vector<struct Shape>& shapes, std::map<std::string, bgfx::TextureHandle>& outTextures);
+
+    float f_offset = 0.002f;
+    float n_offset = 0.0f;
+
+    vector3<float> pos_offset = {0.0f, 0.0f, 0.0f};
 };
 
-void drawFieldShadow();
+void drawFieldShadowCallback();
 
 extern Lighting lighting;

@@ -199,6 +199,27 @@ void lighting_debug(bool* isOpen)
         {
             lighting.setShowWalkmeshEnabled(isShowWalkmeshEnabled);
         }
+
+        auto fOffset = lighting.f_offset;
+        if (ImGui::DragFloat("Far offset", &fOffset, 0.001))
+        {
+            lighting.f_offset = fOffset;
+        }
+
+        auto nOffset = lighting.n_offset;
+        if (ImGui::DragFloat("Near offset", &nOffset, 0.001))
+        {
+            lighting.n_offset = nOffset;
+        }
+
+        auto posOffset = lighting.pos_offset;
+        float posOffsetFloat[3] = { posOffset.x , posOffset.y, posOffset.z };
+        if (ImGui::DragFloat3("Pos offset", posOffsetFloat, 0.001))
+        {
+            lighting.pos_offset.x = posOffsetFloat[0];
+            lighting.pos_offset.y = posOffsetFloat[1];
+            lighting.pos_offset.z = posOffsetFloat[2];
+        }
     }
     ImGui::End();
 }

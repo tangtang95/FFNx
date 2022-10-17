@@ -23,6 +23,7 @@
 #include <stdint.h>
 
 #include "battle/camera.h"
+#include "world/camera.h"
 
 #include "../audio.h"
 #include "../gamepad.h"
@@ -33,6 +34,8 @@
 #include "../log.h"
 #include "../metadata.h"
 #include "../sfx.h"
+#include "../lighting.h"
+#include "../renderer.h"
 #include "../achievement.h"
 
 // CORE GAME LOOP
@@ -269,6 +272,8 @@ void ff7_use_analogue_controls()
 
 	ff7::battle::camera.setRotationSpeed(verticalRotSpeed, horizontalRotSpeed, 0.0f);
 	ff7::battle::camera.setZoomSpeed(zoomSpeed);
+	ff7::world::worldCamera.setRotationSpeed(verticalRotSpeed, horizontalRotSpeed, 0.0f);
+	ff7::world::worldCamera.setZoomSpeed(zoomSpeed);
 }
 
 int ff7_get_gamepad()
@@ -351,7 +356,7 @@ struct ff7_gamepad_status* ff7_update_gamepad_status()
 			ff7_externals.gamepad_status->button4 = joystick.GetState()->rgbButtons[3] & 0x80; // Triangle
 			ff7_externals.gamepad_status->button5 = joystick.GetState()->rgbButtons[4] & 0x80; // L1
 			ff7_externals.gamepad_status->button6 = joystick.GetState()->rgbButtons[5] & 0x80; // R1
-			ff7_externals.gamepad_status->button7 = joystick.GetState()->rgbButtons[6] & 0x80; // L2
+			//ff7_externals.gamepad_status->button7 = joystick.GetState()->rgbButtons[6] & 0x80; // L2
 
 			// Remap R2 trigger to R3 so that we can use the trigger for zoom-in when analogue controls are enabled
 			if(enable_analogue_controls) ff7_externals.gamepad_status->button8 = joystick.GetState()->rgbButtons[11] & 0x80;

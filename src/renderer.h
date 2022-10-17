@@ -154,6 +154,8 @@ struct RendererCallbacks : public bgfx::CallbackI {
 
 class Renderer {
 private:
+    friend class Lighting;
+
     // Current renderer view
     enum RendererProgram {
         FLAT = 0,
@@ -225,6 +227,8 @@ private:
         float worldViewMatrix[16];
         float normalMatrix[16];
 
+        float wmViewMatrix[16];
+
         uint32_t clearColorValue;
 
         RendererCullMode cullMode = RendererCullMode::DISABLED;
@@ -273,6 +277,12 @@ private:
 
     std::vector<WORD> indexBufferData;
     bgfx::DynamicIndexBufferHandle indexBufferHandle = BGFX_INVALID_HANDLE;
+
+    std::vector<Vertex> field3dVertexBufferData;
+    bgfx::DynamicVertexBufferHandle field3dVertexBufferHandle = BGFX_INVALID_HANDLE;
+
+    std::vector<uint32_t> field3dIndexBufferData;
+    bgfx::DynamicIndexBufferHandle field3dIndexBufferHandle = BGFX_INVALID_HANDLE;
 
     bgfx::VertexLayout vertexLayout;
 
@@ -364,6 +374,13 @@ public:
     void bindVertexBuffer(struct nvertex* inVertex, vector3<float>* normals, uint32_t inCount);
     void bindIndexBuffer(WORD* inIndex, uint32_t inCount);
 
+    void fillField3dVertexBuffer(struct nvertex* inVertex, struct vector3<float>* normals, uint32_t inCount);
+    void fillField3dIndexBuffer(uint32_t* inIndex, uint32_t inCount);
+    void updateField3dBuffers();
+    void bindField3dVertexBuffer(uint32_t offset, uint32_t inCount);
+    void bindField3dIndexBuffer(uint32_t offset, uint32_t inCount);
+    void clearField3dBuffers();
+
     void setScissor(uint16_t x, uint16_t y, uint16_t width, uint16_t height);
     void setClearFlags(bool doClearColor = false, bool doClearDepth = false);
     void setBackgroundColor(float r = 0.0f, float g = 0.0f, float b = 0.0f, float a = 0.0f);
@@ -415,6 +432,8 @@ public:
     void setWorldViewMatrix(struct matrix* matrix);
     void setD3DViweport(struct matrix* matrix);
     void setD3DProjection(struct matrix* matrix);
+    void setWmViewMatrix(struct matrix* matrix);
+    float* getWmViewMatrix();
 
     // Internal coord calculation
     uint16_t getInternalCoordX(uint16_t inX);

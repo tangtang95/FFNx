@@ -156,6 +156,9 @@ void Renderer::setLightingUniforms()
     setUniform("lightViewProjMatrix", bgfx::UniformType::Mat4, lightingState.lightViewProjMatrix);
     setUniform("lightViewProjTexMatrix", bgfx::UniformType::Mat4, lightingState.lightViewProjTexMatrix);
     setUniform("lightInvViewProjTexMatrix", bgfx::UniformType::Mat4, lightingState.lightInvViewProjTexMatrix);
+
+    setUniform("viewOffsetMatrix", bgfx::UniformType::Mat4, lightingState.viewOffsetMatrix);
+    setUniform("invViewOffsetMatrix", bgfx::UniformType::Mat4, lightingState.invViewOffsetMatrix);
 }
 
 bgfx::RendererType::Enum Renderer::getUserChosenRenderer() {
@@ -1174,6 +1177,88 @@ void Renderer::bindIndexBuffer(WORD* inIndex, uint32_t inCount)
     bgfx::setIndexBuffer(indexBufferHandle, currentOffset, inCount);
 };
 
+void Renderer::fillField3dVertexBuffer(struct nvertex* inVertex, struct vector3<float>* normals, uint32_t inCount)
+{
+    if (!bgfx::isValid(field3dVertexBufferHandle)) field3dVertexBufferHandle = bgfx::createDynamicVertexBuffer(inCount, vertexLayout, BGFX_BUFFER_ALLOW_RESIZE);
+
+    uint32_t currentOffset = field3dVertexBufferData.size();
+
+    for (uint32_t idx = 0; idx < inCount; idx++)
+    {
+        field3dVertexBufferData.push_back(Vertex());
+
+        field3dVertexBufferData[currentOffset + idx].x = inVertex[idx]._.x;
+        field3dVertexBufferData[currentOffset + idx].y = inVertex[idx]._.y;
+        field3dVertexBufferData[currentOffset + idx].z = inVertex[idx]._.z;
+        field3dVertexBufferData[currentOffset + idx].w = (::isinf(inVertex[idx].color.w) ? 1.0f : inVertex[idx].color.w);
+        field3dVertexBufferData[currentOffset + idx].bgra = inVertex[idx].color.color;
+        field3dVertexBufferData[currentOffset + idx].u = inVertex[idx].u;
+        field3dVertexBufferData[currentOffset + idx].v = inVertex[idx].v;
+
+        if (normals)
+        {
+            field3dVertexBufferData[currentOffset + idx].nx = normals[idx].x;
+            field3dVertexBufferData[currentOffset + idx].ny = normals[idx].y;
+            field3dVertexBufferData[currentOffset + idx].nz = normals[idx].z;
+        }
+
+        if (vertex_log && idx == 0) ffnx_trace("%s: %u [XYZW(%f, %f, %f, %f), BGRA(%08x), UV(%f, %f)]\n", __func__, idx, field3dVertexBufferData[currentOffset + idx].x, field3dVertexBufferData[currentOffset + idx].y, field3dVertexBufferData[currentOffset + idx].z, field3dVertexBufferData[currentOffset + idx].w, field3dVertexBufferData[currentOffset + idx].bgra, field3dVertexBufferData[currentOffset + idx].u, field3dVertexBufferData[currentOffset + idx].v);
+        if (vertex_log && idx == 1) ffnx_trace("%s: See the rest on RenderDoc.\n", __func__);
+    }
+};
+
+void Renderer::fillField3dIndexBuffer(uint32_t* inIndex, uint32_t inCount)
+{
+    if (!bgfx::isValid(field3dIndexBufferHandle)) field3dIndexBufferHandle = bgfx::createDynamicIndexBuffer(inCount, BGFX_BUFFER_ALLOW_RESIZE | BGFX_BUFFER_INDEX32);
+
+    uint32_t currentOffset = field3dIndexBufferData.size();
+
+    for (uint32_t idx = 0; idx < inCount; idx++)
+    {
+        field3dIndexBufferData.push_back(inIndex[idx]);
+    }
+};
+
+void Renderer::updateField3dBuffers()
+{
+    bgfx::update(
+        field3dVertexBufferHandle,
+        0,
+        bgfx::copy(
+            field3dVertexBufferData.data(),
+            vectorSizeOf(field3dVertexBufferData)
+        )
+    );
+
+    bgfx::update(
+        field3dIndexBufferHandle,
+        0,
+        bgfx::copy(
+            field3dIndexBufferData.data(),
+            vectorSizeOf(field3dIndexBufferData)
+        )
+    );
+}
+
+void Renderer::bindField3dVertexBuffer(uint32_t offset, uint32_t inCount)
+{
+    bgfx::setVertexBuffer(0, field3dVertexBufferHandle, offset, inCount);
+}
+
+void Renderer::bindField3dIndexBuffer(uint32_t offset, uint32_t inCount)
+{
+    bgfx::setIndexBuffer(field3dIndexBufferHandle, offset, inCount);
+}
+
+void Renderer::clearField3dBuffers()
+{
+    field3dVertexBufferData.clear();
+    field3dVertexBufferData.shrink_to_fit();
+
+    field3dIndexBufferData.clear();
+    field3dIndexBufferData.shrink_to_fit();
+}
+
 void Renderer::setScissor(uint16_t x, uint16_t y, uint16_t width, uint16_t height)
 {
     scissorOffsetX = getInternalCoordX(x);
@@ -1917,6 +2002,20 @@ float* Renderer::getViewMatrix()
     return internalState.viewMatrix;
 }
 
+void Renderer::setWmViewMatrix(struct matrix* matrix)
+{
+    ::memcpy(internalState.wmViewMatrix, &matrix->m[0][0], sizeof(matrix->m));
+
+    //bx::mtxInverse(internalState.invViewMatrix, internalState.viewMatrix);
+
+    if (uniform_log) printMatrix(__func__, internalState.viewMatrix);
+};
+
+float* Renderer::getWmViewMatrix()
+{
+    return internalState.wmViewMatrix;
+}
+
 void Renderer::setWorldViewMatrix(struct matrix *matrix)
 {
     ::memcpy(internalState.worldViewMatrix, &matrix->m[0][0], sizeof(matrix->m));
@@ -1955,6 +2054,21 @@ void Renderer::setD3DProjection(struct matrix* matrix)
         internalState.d3dProjectionMatrix[0] *= widescreenScale;
         internalState.d3dProjectionMatrix[8] *= widescreenScale;
     }
+
+    /*if(lighting.is3dField())
+    {
+        newRenderer.internalState.d3dProjectionMatrix[8] = 0.0f;
+        newRenderer.internalState.d3dProjectionMatrix[9] = 0.0f;
+    }
+*/
+    float a = newRenderer.internalState.d3dProjectionMatrix[10];
+    float b = newRenderer.internalState.d3dProjectionMatrix[11];
+
+    float f = b / (a + 1.0f) + lighting.f_offset;
+    float n = b / (a - 1.0f) + lighting.n_offset;
+
+    newRenderer.internalState.d3dProjectionMatrix[10] = -(f + n) / (f -n);
+    newRenderer.internalState.d3dProjectionMatrix[11] = -(2*f*n) / (f - n);
 
     if (uniform_log) printMatrix(__func__, internalState.d3dProjectionMatrix);
 };

@@ -27,6 +27,9 @@
 #include "ff8.h"
 #include "field.h"
 #include "cfg.h"
+#include "ff7/battle/camera.h"
+
+#include <iostream>
 
 Lighting lighting;
 
@@ -97,7 +100,7 @@ void Lighting::updateLightMatrices(struct boundingbox* sceneAabb)
 
     float rotMatrix[16];
     float degreeToRadian = M_PI / 180.0f;
-    bx::mtxRotateXYZ(rotMatrix, lightingState.worldLightRot.x * degreeToRadian,
+    bx::mtxRotateXYZ(rotMatrix, -lightingState.worldLightRot.x * degreeToRadian,
         lightingState.worldLightRot.y * degreeToRadian, lightingState.worldLightRot.z * degreeToRadian);
 
     const float forwardVector[4] = { 0.0f, 0.0f, -1.0f, 0.0 };
@@ -704,6 +707,149 @@ struct boundingbox Lighting::calcFieldSceneAabb(struct boundingbox* sceneAabb, s
 	return bb;
 }
 
+
+bool Lighting::import3DMeshGltfFile(char* file_path, char* tex_path, std::vector<struct Shape>& outShapes, std::map<std::string, bgfx::TextureHandle>& outTextures)
+{
+	cgltf_options options = {0};
+	cgltf_data* data = NULL;
+	cgltf_result result = cgltf_parse_file(&options, file_path, &data);
+	if (result != cgltf_result_success)
+	{
+		outShapes.clear();
+		return false;
+	}
+
+	result = cgltf_load_buffers(&options, data, file_path);
+	if (result != cgltf_result_success)
+	{
+		outShapes.clear();
+		return false;
+	}
+
+	for (size_t i = 0; i < data->textures_count; i++)
+	{
+		auto texture = data->textures[i];
+		std::string relativePath = texture.image->uri;
+
+		std::string filename = relativePath.substr(relativePath.find_last_of("/") + 1);
+		std::string name = filename.substr(0, filename.find_last_of("."));
+
+		std::string texFullPath = tex_path + name + ".dds";
+
+		uint32_t width, height, mipCount = 0;
+		outTextures.emplace(name, newRenderer.createTextureHandle(texFullPath.data(), &width, &height, &mipCount, true));
+
+		std::string nmlTexFullPath = tex_path + name + "_nml.dds";
+		auto nmlTextureHandle = newRenderer.createTextureHandle(nmlTexFullPath.data(), &width, &height, &mipCount, false);
+		if(bgfx::isValid(nmlTextureHandle))
+		{
+			outTextures.emplace(name + "_nml", nmlTextureHandle);
+		}
+
+		std::string pbrTexFullPath = tex_path + name + "_pbr.dds";
+		auto pbrTextureHandle = newRenderer.createTextureHandle(pbrTexFullPath.data(), &width, &height, &mipCount, false);
+		if(bgfx::isValid(pbrTextureHandle))
+		{
+			outTextures.emplace(name + "_pbr", pbrTextureHandle);
+		}
+	}
+
+	float scale = 1000.0f;
+	for (size_t i = 0; i < data->meshes_count; i++)
+	{
+		Shape outShape;// = outShapes[i];
+		cgltf_mesh mesh = data->meshes[i];
+		for (size_t j = 0; j < mesh.primitives_count; j++)
+		{
+			cgltf_primitive primitive = mesh.primitives[j];
+			auto indexCount = primitive.indices->count;
+			auto vertexCount = 0;
+
+			float* posBuffer = nullptr;
+			float* normalBuffer = nullptr;
+			float* uvBuffer = nullptr;
+			float* colorBuffer = nullptr;
+			for (size_t k = 0; k < primitive.attributes_count; k++)
+			{
+				cgltf_attribute attr = primitive.attributes[k];
+
+				if(strcmp(attr.name, "POSITION") == 0)
+				{
+					vertexCount = attr.data->count;
+					posBuffer = (float*)((char*)attr.data->buffer_view->buffer->data + attr.data->buffer_view->offset);
+				}
+				else if(strcmp(attr.name, "NORMAL") == 0)
+				{
+					normalBuffer = (float*)((char*)attr.data->buffer_view->buffer->data + attr.data->buffer_view->offset);
+				}
+				else if(strcmp(attr.name, "TEXCOORD_0") == 0)
+				{
+					uvBuffer = (float*)((char*)attr.data->buffer_view->buffer->data + attr.data->buffer_view->offset);
+				}
+				else if(strcmp(attr.name, "COLOR_0") == 0)
+				{
+					colorBuffer = (float*)((char*)attr.data->buffer_view->buffer->data + attr.data->buffer_view->offset);
+				}
+			}
+
+			Shape outShape;
+
+			auto texture = primitive.material->pbr_metallic_roughness.base_color_texture.texture;
+			if(texture != nullptr)
+				outShape.baseColorTexName = texture->image->name;
+			auto baseColorFactor = primitive.material->pbr_metallic_roughness.base_color_factor;
+			for (int vertexIndex = 0; vertexIndex < vertexCount; vertexIndex++)
+			{
+				struct nvertex vertex;
+				vertex._.x = posBuffer[3 * vertexIndex] * scale;
+				vertex._.y = posBuffer[3 * vertexIndex + 2] * scale;
+				vertex._.z = posBuffer[3 * vertexIndex + 1] * scale;
+
+				vertex.color.w = 1.0f;
+				vertex.color.r = static_cast<char>(baseColorFactor[0] * 255);
+				vertex.color.g = static_cast<char>(baseColorFactor[1] * 255);
+				vertex.color.b = static_cast<char>(baseColorFactor[2] * 255);
+				vertex.color.a = static_cast<char>(baseColorFactor[3] * 255);
+
+				vertex.u = uvBuffer[2 * vertexIndex];
+				vertex.v = uvBuffer[2 * vertexIndex + 1];
+
+				outShape.vertices.push_back(vertex);
+
+				struct vector3<float> normal;
+
+				normal.x = normalBuffer[3 * vertexIndex];
+				normal.y = normalBuffer[3 * vertexIndex + 2];
+				normal.z = normalBuffer[3 * vertexIndex + 1];
+
+				outShape.normals.push_back(normal);
+			}
+
+			if(primitive.indices->component_type == cgltf_component_type_r_16u)
+			{
+				auto indexBuffer = (unsigned short*)((char*)primitive.indices->buffer_view->buffer->data + primitive.indices->buffer_view->offset);
+
+				for (int id = 0; id < indexCount; ++id)
+				{
+					outShape.indices.push_back(indexBuffer[id]);
+				}
+			}else if(primitive.indices->component_type == cgltf_component_type_r_32u)
+			{
+				auto indexBuffer = (unsigned int*)((char*)primitive.indices->buffer_view->buffer->data + primitive.indices->buffer_view->offset);
+				for (int id = 0; id < indexCount; ++id)
+				{
+					outShape.indices.push_back(indexBuffer[id]);
+				}
+			}
+
+			outShapes.push_back(outShape);
+		}
+	}
+
+	return true;
+}
+
+
 void Lighting::init()
 {
 	loadConfig();
@@ -742,7 +888,16 @@ void Lighting::draw(struct game_obj* game_object)
 
 	if (mode->driver_mode == MODE_FIELD)
 	{
-		gl_draw_deferred(&drawFieldShadow);
+		gl_draw_deferred(&drawFieldShadowCallback);
+
+	}else if (mode->driver_mode == MODE_WORLDMAP)
+	{
+		gl_set_projection_viewport_matrices();
+
+		load3dWm();
+		draw3dWm();
+
+		gl_draw_deferred(nullptr);
 	}
 	else
 	{
@@ -750,7 +905,7 @@ void Lighting::draw(struct game_obj* game_object)
 	}
 };
 
-void drawFieldShadow()
+void drawFieldShadowCallback()
 {
     lighting.createFieldWalkmesh(lighting.getWalkmeshExtrudeSize());
 
@@ -785,6 +940,160 @@ void drawFieldShadow()
     newRenderer.setWorldViewMatrix(&worldViewMatrix);
 
     newRenderer.drawFieldShadow();
+}
+
+bool Lighting::is3dField()
+{
+	if(shapes.size() > 0) return true;
+	else return false;
+}
+
+bool Lighting::load3dWm()
+{
+	if (newRenderer.field3dVertexBufferData.size() == 0)
+	{
+		shapes.clear();
+		textures.clear();
+		newRenderer.clearField3dBuffers();
+
+		char file_path_gltf[MAX_PATH];
+		sprintf(file_path_gltf, "%s/%s/%s.%s", basedir, "mesh/world/", "wm0", "gltf");
+
+		char tex_path[MAX_PATH];
+		sprintf(tex_path, "%s/mesh/world/textures/", basedir);
+
+		if (!import3DMeshGltfFile(file_path_gltf, tex_path, shapes, textures))
+		{
+			return false;
+		}
+
+		auto shapeCount = shapes.size();
+		for (int i = 0; i < shapeCount; i++)
+		{
+			auto& shape = shapes[i];
+			newRenderer.fillField3dVertexBuffer(shape.vertices.data(), shape.normals.data(), shape.vertices.size());
+			newRenderer.fillField3dIndexBuffer(shape.indices.data(), shape.indices.size());
+		}
+
+		newRenderer.updateField3dBuffers();
+	}
+
+	if(shapes.size() > 0) return true;
+	else return false;
+}
+
+bool Lighting::draw3dWm()
+{
+	auto shapeCount = shapes.size();
+	int vertexOffset = 0;
+	int indexOffset = 0;
+
+	// Create a world matrix
+	struct matrix worldMatrix;
+	identity_matrix(&worldMatrix);
+
+	int world_pos_x = ((int*)(0xE04918))[0];
+	int world_pos_y = ((int*)(0xE04918))[1];
+	int world_pos_z = ((int*)(0xE04918))[2];
+
+	auto rot_matrix = (struct rotation_matrix*)(0xDFC448);
+	auto tr_matrix = (struct transform_matrix*)(0xDE6A20);
+
+	float cameraRotationMatrixFloat[16];
+
+	cameraRotationMatrixFloat[0] = rot_matrix->r3_sub_matrix[0][0] / 4096.0f;
+	cameraRotationMatrixFloat[1] = rot_matrix->r3_sub_matrix[0][1] / 4096.0f;
+	cameraRotationMatrixFloat[2] = rot_matrix->r3_sub_matrix[0][2] / 4096.0f;
+	cameraRotationMatrixFloat[3] = 0.0f;
+
+	cameraRotationMatrixFloat[4] = rot_matrix->r3_sub_matrix[1][0] / 4096.0f;
+	cameraRotationMatrixFloat[5] = rot_matrix->r3_sub_matrix[1][1] / 4096.0f;
+	cameraRotationMatrixFloat[6] = rot_matrix->r3_sub_matrix[1][2] / 4096.0f;
+	cameraRotationMatrixFloat[7] = 0.0f;
+
+	cameraRotationMatrixFloat[8] = rot_matrix->r3_sub_matrix[2][0] / 4096.0f;
+	cameraRotationMatrixFloat[9] = rot_matrix->r3_sub_matrix[2][1] / 4096.0f;
+	cameraRotationMatrixFloat[10] = rot_matrix->r3_sub_matrix[2][2] / 4096.0f;
+	cameraRotationMatrixFloat[11] = 0.0f;
+
+	cameraRotationMatrixFloat[12] = 0.0f;
+	cameraRotationMatrixFloat[13] = 0.0f;
+	cameraRotationMatrixFloat[14] = 0.0f;
+	cameraRotationMatrixFloat[15] = 1.0f;
+
+	float cameraTranslationMatrixFloat[16];
+	bx::mtxTranslate(cameraTranslationMatrixFloat, 0, 0, -tr_matrix->pos_z);
+
+	float cameraTranslationMatrixFloat2[16];
+	bx::mtxTranslate(cameraTranslationMatrixFloat2, world_pos_x + pos_offset.x, world_pos_y + pos_offset.y, world_pos_z + pos_offset.z);
+
+	float tmp[16];
+	bx::mtxMul(tmp, cameraTranslationMatrixFloat, cameraRotationMatrixFloat);
+
+	float cameraMatrixFloat[16];
+	bx::mtxMul(cameraMatrixFloat, tmp, cameraTranslationMatrixFloat2);
+
+	float viewMatrixFloat[16];
+	bx::mtxInverse(viewMatrixFloat, cameraMatrixFloat);
+
+	struct matrix viewMatrix;
+	::memcpy(&viewMatrix.m[0][0], viewMatrixFloat, sizeof(viewMatrix.m));
+
+	// Create a world view matrix
+	struct matrix worldViewMatrix;
+	multiply_matrix(&worldMatrix, &viewMatrix, &worldViewMatrix);
+
+	newRenderer.setViewMatrix(&worldViewMatrix);
+	struct boundingbox sceneAabb = calculateSceneAabb();
+	updateLightMatrices(&sceneAabb);
+
+	for (int i = 0; i < shapeCount; i++)
+	{
+		auto& shape = shapes[i];
+
+		newRenderer.resetState();
+
+		newRenderer.bindField3dVertexBuffer(vertexOffset, shape.vertices.size());
+		newRenderer.bindField3dIndexBuffer(indexOffset, shape.indices.size());
+
+		newRenderer.setPrimitiveType();
+		newRenderer.isTLVertex(false);
+		newRenderer.setCullMode(RendererCullMode::DISABLED);
+		newRenderer.setBlendMode(RendererBlendMode::BLEND_NONE);
+		newRenderer.isFBTexture(false);
+		newRenderer.doDepthTest(true);
+		newRenderer.doDepthWrite(true);
+
+		if(textures.count(shape.baseColorTexName) == 1)
+		{
+			auto baseColorTexHandle = textures[shape.baseColorTexName];
+			newRenderer.useTexture(baseColorTexHandle.idx, RendererTextureSlot::TEX_Y);
+		} else newRenderer.useTexture(0, RendererTextureSlot::TEX_Y);
+
+		auto nmlTexName = shape.baseColorTexName + "_nml";
+		if(textures.count(nmlTexName) == 1)
+		{
+			auto nmlTexHandle = textures[nmlTexName];
+			newRenderer.useTexture(nmlTexHandle.idx, RendererTextureSlot::TEX_NML);
+		} else newRenderer.useTexture(0, RendererTextureSlot::TEX_NML);
+
+		auto pbrTexName = shape.baseColorTexName + "_pbr";
+		if(textures.count(pbrTexName) == 1)
+		{
+			auto pbrTexHandle = textures[pbrTexName];
+			newRenderer.useTexture(pbrTexHandle.idx, RendererTextureSlot::TEX_PBR);
+		} else newRenderer.useTexture(0, RendererTextureSlot::TEX_PBR);
+
+		newRenderer.setWorldViewMatrix(&worldViewMatrix);
+
+		newRenderer.drawWithLighting(true);
+
+		vertexOffset += shape.vertices.size();
+		indexOffset += shape.indices.size();
+	}
+
+	if(shapeCount > 0) return true;
+	else return false;
 }
 
 const LightingState& Lighting::getLightingState()

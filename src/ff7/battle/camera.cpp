@@ -405,4 +405,60 @@ namespace ff7::battle
         cameraPosition->y = newCameraPos[1];
         cameraPosition->z = newCameraPos[2];
     }
+
+    void Camera::controlWmCamera(bx::Vec3* cameraPosition, const bx::Vec3& cameraFocusPosition, float initialDist)
+    {
+        bx::Vec3 cameraPos = {
+            static_cast<float>(cameraFocusPosition.x),
+            static_cast<float>(cameraFocusPosition.y),
+            static_cast<float>(cameraFocusPosition.z - initialDist)};
+
+        float candidateDist = initialDist - (zoomOffset + zoomSpeed);
+        if(candidateDist < maxZoomDist && candidateDist > minZoomDist)
+        {
+            zoomOffset = zoomOffset + zoomSpeed;
+        }
+
+        bx::Vec3 up = { 0, 1, 0 };
+        bx::Vec3 forward =  { cameraFocusPosition.x - cameraPos.x,
+                            cameraFocusPosition.y - cameraPos.y,
+                            cameraFocusPosition.z - cameraPos.z};
+        forward  = bx::normalize(forward);
+        bx::Vec3 right = bx::cross(forward, up);
+
+        cameraPos = bx::add(cameraPos, bx::mul(forward, zoomOffset));
+
+        rotationOffset.x = std::min(std::max(rotationOffset.x + rotationSpeed.x, -85.0f), -5.0f);
+        rotationOffset.y = std::remainder(rotationOffset.y + rotationSpeed.y, 360.0f);
+
+        auto quaternionH = bx::fromAxisAngle(up, M_PI * rotationOffset.y / 180.0f);
+        auto quaternionV = bx::fromAxisAngle(right, M_PI * rotationOffset.x / 180.0f);
+
+        auto quaternion = bx::mul(quaternionV, quaternionH);
+        quaternion = bx::normalize(quaternion);
+
+        float focusToOriginMatrix[16];
+        bx::mtxTranslate(focusToOriginMatrix, -cameraFocusPosition.x, -cameraFocusPosition.y, -cameraFocusPosition.z);
+
+        float originToFocusMatrix[16];
+        bx::mtxTranslate(originToFocusMatrix, cameraFocusPosition.x, cameraFocusPosition.y, cameraFocusPosition.z);
+
+        float rotMat[16];
+        bx::mtxFromQuaternion(rotMat, quaternion);
+
+        float tmp[16];
+        bx::mtxMul(tmp, focusToOriginMatrix, rotMat);
+
+        float tmp2[16];
+        bx::mtxMul(tmp2, tmp, originToFocusMatrix);
+
+        // Get new camera pos
+        float newCameraPos[4] =  { 0.0f, 0.0f, 0.0f , 1.0f};
+        float oldCameraPos[4] =  { cameraPos.x, cameraPos.y, cameraPos.z, 1.0f};
+        bx::vec4MulMtx(newCameraPos, oldCameraPos, tmp2);
+
+        cameraPosition->x = newCameraPos[0];
+        cameraPosition->y = newCameraPos[1];
+        cameraPosition->z = newCameraPos[2];
+    }
 }
