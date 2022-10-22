@@ -21,13 +21,67 @@
 //    GNU General Public License for more details.                          //
 /****************************************************************************/
 
-#pragma once
-
 namespace ff7::world
 {
-    void world_hook_init();
-    void world_update_model_movement(int delta_position_x, int delta_position_z);
+    enum input_key
+    {
+        L2 = 1,
+        R2 = 2,
+        L1 = 4,
+        R1 = 8,
+        TRIANGLE = 16,
+        CIRCLE = 32,
+        CROSS = 64,
+        SQUARE = 128,
+        SELECT = 256,
+        UNK1 = 512,
+        UNK2 = 1024,
+        START = 2048,
+        UP = 4096,
+        RIGHT = 8192,
+        DOWN = 16384,
+        LEFT = 32768,
+        ANY_DIRECTIONAL_KEY = UP | RIGHT | DOWN | LEFT
+    };
 
-    void update_world_camera(short world_camera_rotation_y);
-    void update_player_and_handle_input();
+    enum map_type {
+        OVERWORLD = 0,
+        UNDERWATER = 2,
+        SNOWSTORM = 3
+    };
+
+    enum model_type {
+        CLOUD = 0,
+        TIFA,
+        CID,
+        HIGHWIND,
+        WILD_CHOCOBO,
+        TINY_BRONCO ,
+        BUGGY,
+        JUNON_CANNON,
+        CARGO_SHIP,
+        HIGHWIND_PROPELLERS,
+        DIAMOND_WEAPON,
+        ULTIMATE_WEAPON,
+        FORT_CONDOR,
+        SUBMARINE,
+        GOLD_SAUCER,
+        ROCKET_TOWN_ROCKET,
+        ROCKET_TOWN_LAUNCH_PAD,
+        SUNKEN_GELNIKA,
+        UNDERWATER_REACTOR,
+        CHOCOBO,
+        MIDGAR_CANNON,
+        MODEL_UNK1,
+        MODEL_UNK2,
+        MODEL_UNK3,
+        NORTH_CRATER_BARRIER,
+        ANCIENT_FOREST,
+        KEY_ANCIENTS,
+        MODEL_UNK4,
+        RED_SUBMARINE,
+        RUBY_WEAPON,
+        EMERALD_WEAPON
+    };
+
 }

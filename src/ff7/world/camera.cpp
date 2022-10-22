@@ -22,6 +22,8 @@
 /****************************************************************************/
 
 #include "camera.h"
+#include "world.h"
+#include "utils.h"
 
 #include "defs.h"
 #include "../../patch.h"
@@ -30,54 +32,51 @@ namespace ff7::world
 {
     WorldCamera worldCamera;
 
-    void update_world_camera_front()
+    void update_world_camera_front(int current_key_input, int prev_key_input)
     {
-        int current_key_input_status = ff7_externals.world_get_current_key_input_status();
-        int prev_key_input_status = *ff7_externals.world_prev_key_input_status_DFC470;
         int world_map_type = *ff7_externals.world_map_type_E045E8;
         int camera_view_type = *ff7_externals.world_camera_viewtype_DFC4B4;
         int movement_multiplier = *ff7_externals.world_movement_multiplier_DFC480;
 
-        bool is_unknown_view = camera_view_type == UNKNOWN_VIEW && (current_key_input_status & SQUARE) != 0;
+        bool highwind_view_and_square_pressed = camera_view_type == HIGHWIND_VIEW && is_key_pressed(current_key_input, SQUARE);
         if (world_map_type == SNOWSTORM)
         {
-            int delta_camera_step = 0;
-            if ((current_key_input_status & CIRCLE) == 0 || (prev_key_input_status & CIRCLE) != 0)
-                delta_camera_step = ff7_externals.world_snowstorm_get_camera_movement_758B12(current_key_input_status & (UP | DOWN | LEFT | RIGHT), 0);
-            else
-                delta_camera_step = ff7_externals.world_snowstorm_get_camera_movement_758B12(current_key_input_status & (UP | DOWN | LEFT | RIGHT), 1);
+            int delta_camera_step = ff7_externals.world_snowstorm_get_camera_movement_758B12(current_key_input & ANY_DIRECTIONAL_KEY,
+                                    !is_key_released(current_key_input, prev_key_input, CIRCLE));
             *ff7_externals.world_camera_front_DFC484 += delta_camera_step;
         }
-        else if (!is_unknown_view)
+        else if (!highwind_view_and_square_pressed)
         {
-            /*
-            int direction_key;
-            if (camera_view_type == FRONT_VIEW && world_map_type != UNDERWATER && (current_key_input_status & DOWN) != 0)
+            int direction_key, camera_rotate_speed = 0;
+            if (camera_view_type == FRONT_VIEW && world_map_type != UNDERWATER && is_key_pressed(current_key_input, DOWN))
                 direction_key = RIGHT;
             else
                 direction_key = LEFT;
-            int camera_rotate_speed = ((current_key_input_status & direction_key) != 0) + ((current_key_input_status & L1) != 0);
+            camera_rotate_speed = is_key_pressed(current_key_input, direction_key) + is_key_pressed(current_key_input, L1);
             if (camera_rotate_speed)
             {
-                int divider = world_map_type == UNDERWATER && (current_key_input_status & L1) == 0;
-                *ff7_externals.world_camera_front_DFC484 -= ((2 - ((current_key_input_status & (UP | DOWN)) != 0)) * camera_rotate_speed * 8 * movement_multiplier) >> divider;
+                int divider = world_map_type == UNDERWATER && (current_key_input & L1) == 0;
+                *ff7_externals.world_camera_front_DFC484 -= ((2 - is_key_pressed(current_key_input, UP | DOWN)) * camera_rotate_speed * 8 * movement_multiplier) >> divider;
             }
 
-            camera_rotate_speed = ((current_key_input_status & direction_key) != 0) + ((current_key_input_status & R1) != 0);
+            if (camera_view_type == FRONT_VIEW && world_map_type != UNDERWATER && is_key_pressed(current_key_input, DOWN))
+                direction_key = LEFT;
+            else
+                direction_key = RIGHT;
+            camera_rotate_speed = is_key_pressed(current_key_input, direction_key) + is_key_pressed(current_key_input, R1);
             if (camera_rotate_speed)
             {
-                int divider = world_map_type == UNDERWATER && (current_key_input_status & R1) == 0;
-                *ff7_externals.world_camera_front_DFC484 += ((2 - ((current_key_input_status & (UP | DOWN)) != 0)) * camera_rotate_speed * 8 * movement_multiplier) >> divider;
+                int divider = world_map_type == UNDERWATER && (current_key_input & R1) == 0;
+                *ff7_externals.world_camera_front_DFC484 += ((2 - is_key_pressed(current_key_input, UP | DOWN)) * camera_rotate_speed * 8 * movement_multiplier) >> divider;
             }
-            */
-            auto rotationSpeed = worldCamera.getRotationSpeed();
-            worldCamera.rotationOffset.x = std::min(std::max(worldCamera.rotationOffset.x - rotationSpeed.x, -175.0f), -95.0f);
-            worldCamera.rotationOffset.y = std::remainder(worldCamera.rotationOffset.y - rotationSpeed.y, 360.0f);
 
-            *ff7_externals.world_camera_front_DFC484 = worldCamera.rotationOffset.y * 4096 / 360.0f;
+            // auto rotationSpeed = worldCamera.getRotationSpeed();
+            // worldCamera.rotationOffset.x = std::min(std::max(worldCamera.rotationOffset.x - rotationSpeed.x, -175.0f), -95.0f);
+            // worldCamera.rotationOffset.y = std::remainder(worldCamera.rotationOffset.y - rotationSpeed.y, 360.0f);
+
+            // *ff7_externals.world_camera_front_DFC484 = worldCamera.rotationOffset.y * 4096 / 360.0f;
         }
 
-        /*
         if (*ff7_externals.world_camera_front_DFC484 >= 0)
         {
             if (*ff7_externals.world_camera_front_DFC484 >= 4096)
@@ -85,16 +84,14 @@ namespace ff7::world
         }
         else
             *ff7_externals.world_camera_front_DFC484 = 4096;
-        */
     }
 
     void update_world_camera_rotation_y()
     {
-        /*
         int camera_view_type = *ff7_externals.world_camera_viewtype_DFC4B4;
         int movement_multiplier = *ff7_externals.world_movement_multiplier_DFC480;
 
-        if (camera_view_type != UNKNOWN_VIEW)
+        if (camera_view_type != HIGHWIND_VIEW)
             *ff7_externals.world_camera_var2_DE6B4C = (*ff7_externals.world_camera_var1_DF542C + 3 * (*ff7_externals.world_camera_var2_DE6B4C)) >> 2;
 
         if (*ff7_externals.world_camera_rotation_y_DFC474 >= *ff7_externals.world_camera_front_DFC484 - 2048)
@@ -109,9 +106,8 @@ namespace ff7::world
             *ff7_externals.world_camera_rotation_y_DFC474 = (*ff7_externals.world_camera_front_DFC484 + 31 * (*ff7_externals.world_camera_rotation_y_DFC474)) >> 5;
         else
             *ff7_externals.world_camera_rotation_y_DFC474 = (*ff7_externals.world_camera_front_DFC484 + 15 * (*ff7_externals.world_camera_rotation_y_DFC474)) >> 4;
-        */
 
-        *ff7_externals.world_camera_rotation_y_DFC474 = *ff7_externals.world_camera_front_DFC484;
+        //*ff7_externals.world_camera_rotation_y_DFC474 = *ff7_externals.world_camera_front_DFC484;
     }
 
     void update_world_camera(short world_camera_rotation_y)
@@ -150,17 +146,6 @@ namespace ff7::world
         translation_matrix->pos_x = 0;
         translation_matrix->pos_y = 0;
         translation_matrix->pos_z = 10000 - worldCamera.zoomOffset;
-    }
-
-    void world_camera_hook_init()
-    {
-        memset_code(ff7_externals.world_update_player_74EA48 + 0x3B1, 0x90, 425);
-        replace_call_function(ff7_externals.world_update_player_74EA48 + 0x3B1, update_world_camera_front);
-
-        memset_code(ff7_externals.world_update_player_74EA48 + 0xD24, 0x90, 269);
-        replace_call_function(ff7_externals.world_update_player_74EA48 + 0xD24, update_world_camera_rotation_y);
-
-        replace_function(ff7_externals.world_update_camera_74E8CE, update_world_camera);
     }
 
     void WorldCamera::setRotationSpeed(float rotX, float rotY, float rotZ)

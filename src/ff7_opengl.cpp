@@ -287,7 +287,8 @@ void ff7_init_hooks(struct game_obj *_game_object)
 	// ###########################
 	if(enable_analogue_controls) {
 		replace_call_function(ff7_externals.battle_sub_42D992 + 0xFB, ff7::battle::update_battle_camera);
-		ff7::world::world_camera_hook_init();
+		//replace_function(ff7_externals.world_update_camera_74E8CE, ff7::world::update_world_camera);
+		replace_function(ff7_externals.world_update_player_74EA48, ff7::world::update_player_and_handle_input);
 	}
 
 	//######################

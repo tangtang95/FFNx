@@ -29,38 +29,15 @@
 
 namespace ff7::world
 {
-    enum input_key
-    {
-        L2 = 1,
-        R2 = 2,
-        L1 = 4,
-        R1 = 8,
-        TRIANGLE = 16,
-        CIRCLE = 32,
-        CROSS = 64,
-        SQUARE = 128,
-        SELECT = 256,
-        UNK1 = 512,
-        UNK2 = 1024,
-        START = 2048,
-        UP = 4096,
-        RIGHT = 8192,
-        DOWN = 16384,
-        LEFT = 32768
-    };
-
-    enum map_type {
-        OVERWORLD = 0,
-        UNDERWATER = 2,
-        SNOWSTORM = 3
-    };
-
     enum world_camera_viewtype
     {
         TOP_DOWN_VIEW = 0,
         FRONT_VIEW = 2,
-        UNKNOWN_VIEW = 3
+        HIGHWIND_VIEW = 3
     };
+
+    void update_world_camera_front(int current_key_input, int prev_key_input);
+    void update_world_camera_rotation_y();
 
     class WorldCamera
     {
