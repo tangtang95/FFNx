@@ -123,6 +123,7 @@ uint32_t gl_defer_yuv_frame(uint32_t buffer_index);
 uint32_t gl_defer_battle_depth_clear();
 uint32_t gl_defer_zoom();
 void gl_draw_deferred(draw_field_shadow_callback shadow_callback);
+void gl_set_projection_viewport_matrices();
 struct boundingbox calculateSceneAabb();
 void gl_draw_sorted_deferred();
 void gl_check_deferred(struct texture_set *texture_set);

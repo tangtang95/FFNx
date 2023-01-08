@@ -295,11 +295,18 @@ void ff7_init_hooks(struct game_obj *_game_object)
 	replace_function(ff7_externals.get_gamepad, ff7_get_gamepad);
 	replace_function(ff7_externals.update_gamepad_status, ff7_update_gamepad_status);
 
-	// #####################
-	// control battle camera
-	// #####################
-	if(enable_analogue_controls)
+	// ###########################
+	// control battle/world camera
+	// ###########################
+	if(enable_analogue_controls) {
 		replace_call_function(ff7_externals.battle_sub_42D992 + 0xFB, ff7::battle::update_battle_camera);
+	}
+
+	if (enable_external_mesh)
+	{
+		replace_function(ff7_externals.world_update_camera_74E8CE, ff7::world::update_world_camera);
+		replace_function(ff7_externals.world_update_player_74EA48, ff7::world::update_player_and_handle_input);
+	}
 
 	//######################
 	// menu rendering fix

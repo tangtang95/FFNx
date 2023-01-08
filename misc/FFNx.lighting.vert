@@ -21,17 +21,21 @@ $output v_color0, v_texcoord0, v_position0, v_shadow0, v_normal0
 uniform mat4 d3dViewport;
 uniform mat4 d3dProjection;
 uniform mat4 viewMatrix;
+uniform mat4 invViewMatrix;
 uniform mat4 worldView;
 uniform mat4 normalMatrix;
 uniform mat4 lightViewProjTexMatrix;
 
 uniform vec4 VSFlags;
+uniform vec4 WMFlags;
 uniform vec4 lightingDebugData;
 
 #define isTLVertex VSFlags.x > 0.0
 #define blendMode VSFlags.y
 #define isFBTexture VSFlags.z > 0.0
 #define isNotTexture VSFlags.w == 0.0
+
+#define isApplySphericalWorld WMFlags.x > 0.0
 
 #define isHide2dEnabled lightingDebugData.x > 0.0
 
@@ -54,9 +58,24 @@ void main()
     else
     {
         v_position0 = mul(worldView, vec4(pos.xyz, 1.0));
+
+        if (isApplySphericalWorld)
+        {
+            float rp = -300000;
+
+            vec2 planedir = normalize(vec2(v_position0.x, v_position0.z));
+            vec2 plane = vec2(v_position0.y + rp, sqrt((v_position0.x) * (v_position0.x) + (v_position0.z) * (v_position0.z)));
+            vec2 circle = plane.x * vec2(cos(plane.y / rp), sin(plane.y / rp)) - vec2(rp, 0);
+            pos = vec4(circle.y * planedir.x, circle.x, circle.y * planedir.y, 1.0);
+        }
+        else
+        {
+            pos = v_position0;
+        }
+
         v_shadow0 = mul(lightViewProjTexMatrix, v_position0);
         v_normal0 = mul(normalMatrix, vec4(a_normal, 0.0)).xyz;
-        pos = mul(mul(d3dViewport, d3dProjection), v_position0);
+        pos = mul(mul(d3dViewport, d3dProjection), pos);
 
         if (color.a > 0.5) color.a = 0.5;
     }

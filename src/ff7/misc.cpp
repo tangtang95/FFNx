@@ -23,6 +23,8 @@
 #include <stdint.h>
 
 #include "battle/camera.h"
+#include "world/camera.h"
+#include "world/world.h"
 
 #include "../audio.h"
 #include "../gamepad.h"
@@ -33,6 +35,8 @@
 #include "../log.h"
 #include "../metadata.h"
 #include "../sfx.h"
+#include "../lighting.h"
+#include "../renderer.h"
 #include "../achievement.h"
 
 // CORE GAME LOOP
@@ -211,7 +215,12 @@ void ff7_use_analogue_controls()
 	{
 		if (joystick.Refresh())
 		{
-			joyDir = {static_cast<float>(joystick.GetState()->lX), -static_cast<float>(joystick.GetState()->lY), 0.0f};
+			if(std::abs(joystick.GetState()->lX) > joystick.GetDeadZone(right_analog_trigger_deadzone) ||
+			   std::abs(joystick.GetState()->lY) > joystick.GetDeadZone(right_analog_trigger_deadzone))
+				joyDir = {static_cast<float>(joystick.GetState()->lX) / static_cast<float>(SHRT_MAX),
+				         -static_cast<float>(joystick.GetState()->lY) / static_cast<float>(SHRT_MAX), 0.0f};
+			else
+				joyDir = {0.0f, 0.0, 0.0};
 
 			if(joystick.GetState()->lY < joystick.GetDeadZone(-0.5f) &&
 			!(joystick.GetState()->lX < joystick.GetDeadZone(-0.5f) || joystick.GetState()->lX > joystick.GetDeadZone(0.5f)))
@@ -254,6 +263,8 @@ void ff7_use_analogue_controls()
 		}
 	}
 
+	ff7::world::world.SetJoystickDirection(joyDir);
+
 	float inputDirLength = vector_length(&inputDir);
 	if(inputDirLength > 0.0f)
 	{
@@ -269,6 +280,8 @@ void ff7_use_analogue_controls()
 
 	ff7::battle::camera.setRotationSpeed(verticalRotSpeed, horizontalRotSpeed, 0.0f);
 	ff7::battle::camera.setZoomSpeed(zoomSpeed);
+	ff7::world::camera.setRotationSpeed(0.5f*verticalRotSpeed, 0.5f*horizontalRotSpeed, 0.0f);
+	ff7::world::camera.setZoomSpeed(0.5f*zoomSpeed);
 }
 
 int ff7_get_gamepad()

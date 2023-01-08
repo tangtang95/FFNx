@@ -980,6 +980,21 @@ void common_flip(struct game_obj *game_object)
 	// Update RAM usage info
 	GlobalMemoryStatusEx(&last_ram_state);
 
+	if (!ff8 && (enable_lighting || enable_external_mesh)) lighting.update(game_object);
+
+	if(!ff8 && enable_external_mesh)
+	{
+		newRenderer.setApplySphericalWorld(mode->driver_mode == MODE_WORLDMAP);
+
+		if (mode->driver_mode == MODE_WORLDMAP)
+		{
+			gl_set_projection_viewport_matrices();
+
+			newRenderer.loadWorldMapExternalMesh();
+			newRenderer.drawWorldMapExternalMesh();
+		}
+	}
+
 	// Draw with lighting
 	if (!ff8 && enable_lighting) lighting.draw(game_object);
 

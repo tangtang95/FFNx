@@ -575,6 +575,43 @@ void gl_draw_deferred(draw_field_shadow_callback shadow_callback)
 	gl_load_state(&saved_state);
 }
 
+void gl_set_projection_viewport_matrices()
+{
+	struct driver_state saved_state;
+
+	gl_save_state(&saved_state);
+
+	for (int i = 0; i < num_deferred; ++i)
+	{
+		if(deferred_draws[i].draw_call_type == DCT_CLEAR)
+		{
+			continue;
+		} else if(deferred_draws[i].draw_call_type == DCT_BLIT)
+		{
+			continue;
+		}
+		else if(deferred_draws[i].draw_call_type == DCT_DRAW_MOVIE)
+		{
+			continue;
+		}
+		else if(deferred_draws[i].draw_call_type == DCT_ZOOM)
+		{
+			continue;
+		}
+
+		if (deferred_draws[i].vertextype != TLVERTEX)
+		{
+			gl_load_state(&deferred_draws[i].state);
+
+			newRenderer.setD3DProjection(&current_state.d3dprojection_matrix);
+			newRenderer.setD3DViweport(&d3dviewport_matrix);
+			break;
+		}
+	}
+
+	gl_load_state(&saved_state);
+}
+
 struct boundingbox calculateSceneAabb()
 {
 	struct boundingbox sceneAabb;

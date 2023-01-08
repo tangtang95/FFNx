@@ -27,6 +27,9 @@
 #include "ff8.h"
 #include "field.h"
 #include "cfg.h"
+#include "ff7/battle/camera.h"
+
+#include <iostream>
 
 Lighting lighting;
 
@@ -117,6 +120,13 @@ void Lighting::updateLightMatrices(struct boundingbox* sceneAabb)
         area = lightingState.fieldShadowMapArea;
         nearFarSize = lightingState.fieldShadowMapNearFarSize;
     }
+
+	if (mode->driver_mode == MODE_WORLDMAP)
+    {
+		worldSpaceLightDir[1] *= -1.0f;
+        worldSpaceLightDir[2] *= -1.0f;
+		worldSpaceLightDir[3] *= -1.0f;
+	}
 
     // Transform light direction into view space
     float viewSpaceLightDir[4];
@@ -710,12 +720,10 @@ void Lighting::init()
 	initParamsFromConfig();
 }
 
-void Lighting::draw(struct game_obj* game_object)
+void Lighting::update(struct game_obj* game_object)
 {
-    VOBJ(game_obj, game_object, game_object);
+	VOBJ(game_obj, game_object, game_object);
     struct game_mode* mode = getmode_cached();
-
-	ff7_load_ibl();
 
     struct matrix viewMatrix;
     struct matrix* pViewMatrix = &viewMatrix;
@@ -730,6 +738,58 @@ void Lighting::draw(struct game_obj* game_object)
         newRenderer.setViewMatrix(&viewMatrix);
         updateLightMatrices(&fieldSceneAabb);
     }
+	else if (mode->driver_mode == MODE_WORLDMAP)
+	{
+		int world_pos_x = ((int*)(0xE04918))[0];
+		int world_pos_y = ((int*)(0xE04918))[1];
+		int world_pos_z = ((int*)(0xE04918))[2];
+
+		auto rot_matrix = (struct rotation_matrix*)(0xDFC448);
+		auto tr_matrix = (struct transform_matrix*)(0xDE6A20);
+
+		float cameraRotationMatrixFloat[16];
+
+		cameraRotationMatrixFloat[0] = rot_matrix->r3_sub_matrix[0][0] / 4096.0f;
+		cameraRotationMatrixFloat[1] = rot_matrix->r3_sub_matrix[0][1] / 4096.0f;
+		cameraRotationMatrixFloat[2] = rot_matrix->r3_sub_matrix[0][2] / 4096.0f;
+		cameraRotationMatrixFloat[3] = 0.0f;
+
+		cameraRotationMatrixFloat[4] = rot_matrix->r3_sub_matrix[1][0] / 4096.0f;
+		cameraRotationMatrixFloat[5] = rot_matrix->r3_sub_matrix[1][1] / 4096.0f;
+		cameraRotationMatrixFloat[6] = rot_matrix->r3_sub_matrix[1][2] / 4096.0f;
+		cameraRotationMatrixFloat[7] = 0.0f;
+
+		cameraRotationMatrixFloat[8] = rot_matrix->r3_sub_matrix[2][0] / 4096.0f;
+		cameraRotationMatrixFloat[9] = rot_matrix->r3_sub_matrix[2][1] / 4096.0f;
+		cameraRotationMatrixFloat[10] = rot_matrix->r3_sub_matrix[2][2] / 4096.0f;
+		cameraRotationMatrixFloat[11] = 0.0f;
+
+		cameraRotationMatrixFloat[12] = 0.0f;
+		cameraRotationMatrixFloat[13] = 0.0f;
+		cameraRotationMatrixFloat[14] = 0.0f;
+		cameraRotationMatrixFloat[15] = 1.0f;
+
+		float cameraTranslationMatrixFloat[16];
+		bx::mtxTranslate(cameraTranslationMatrixFloat, 0, 0, -tr_matrix->pos_z);
+
+		float cameraTranslationMatrixFloat2[16];
+		bx::mtxTranslate(cameraTranslationMatrixFloat2, world_pos_x, world_pos_y, world_pos_z);
+
+		float tmp[16];
+		bx::mtxMul(tmp, cameraTranslationMatrixFloat, cameraRotationMatrixFloat);
+
+		float cameraMatrixFloat[16];
+		bx::mtxMul(cameraMatrixFloat, tmp, cameraTranslationMatrixFloat2);
+
+		float viewMatrixFloat[16];
+		bx::mtxInverse(viewMatrixFloat, cameraMatrixFloat);
+
+		struct matrix viewMatrix;
+		::memcpy(&viewMatrix.m[0][0], viewMatrixFloat, sizeof(viewMatrix.m));
+
+		newRenderer.setViewMatrix(&viewMatrix);
+		updateLightMatrices(&sceneAabb);
+	}
     else
     {
         pViewMatrix = VREF(game_object, camera_matrix);
@@ -739,10 +799,22 @@ void Lighting::draw(struct game_obj* game_object)
             updateLightMatrices(&sceneAabb);
         }
     }
+}
+
+void Lighting::draw(struct game_obj* game_object)
+{
+	VOBJ(game_obj, game_object, game_object);
+    struct game_mode* mode = getmode_cached();
+
+	ff7_load_ibl();
 
 	if (mode->driver_mode == MODE_FIELD)
 	{
-		gl_draw_deferred(&drawFieldShadow);
+		gl_draw_deferred(&drawFieldShadowCallback);
+
+	}else if (mode->driver_mode == MODE_WORLDMAP)
+	{
+		gl_draw_deferred(nullptr);
 	}
 	else
 	{
@@ -750,7 +822,7 @@ void Lighting::draw(struct game_obj* game_object)
 	}
 };
 
-void drawFieldShadow()
+void drawFieldShadowCallback()
 {
     lighting.createFieldWalkmesh(lighting.getWalkmeshExtrudeSize());
 

@@ -27,9 +27,12 @@
 #include "../../sfx.h"
 
 #include "defs.h"
+#include "world.h"
 
 namespace ff7::world
 {
+    World world;
+
     std::map<uint32_t, bool> do_decrease_wait_frames;
 
     bool world_has_old_highwind()

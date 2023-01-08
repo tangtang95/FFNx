@@ -120,6 +120,7 @@ private:
 public:
     void init();
 
+    void update(struct game_obj* game_object);
     void draw(struct game_obj* game_object);
 
     const LightingState& getLightingState();
@@ -198,6 +199,6 @@ public:
     DebugOutput GetDebugOutput();
 };
 
-void drawFieldShadow();
+void drawFieldShadowCallback();
 
 extern Lighting lighting;

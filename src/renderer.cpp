@@ -125,40 +125,49 @@ void Renderer::setCommonUniforms()
     };
     if (uniform_log) ffnx_trace("%s: FSTexFlags XYZW(isNmlTextureLoaded %f, isPbrTextureLoaded %f, isIblTextureLoaded %f, NULL)\n", __func__, internalState.FSTexFlags[0], internalState.FSTexFlags[1], internalState.FSTexFlags[2]);
 
-    setUniform("VSFlags", bgfx::UniformType::Vec4, internalState.VSFlags.data());
-    setUniform("FSAlphaFlags", bgfx::UniformType::Vec4, internalState.FSAlphaFlags.data());
-    setUniform("FSMiscFlags", bgfx::UniformType::Vec4, internalState.FSMiscFlags.data());
-    setUniform("FSHDRFlags", bgfx::UniformType::Vec4, internalState.FSHDRFlags.data());
-    setUniform("FSTexFlags", bgfx::UniformType::Vec4, internalState.FSTexFlags.data());
-    setUniform("TimeColor", bgfx::UniformType::Vec4, internalState.TimeColor.data());
-    setUniform("TimeData", bgfx::UniformType::Vec4, internalState.TimeData.data());
+    internalState.WMFlags = {
+        (float)internalState.bIsApplySphericalWorld,
+        NULL,
+        NULL,
+        NULL
+    };
+    if (uniform_log) ffnx_trace("%s: VSFlags XYZW(isTLVertex %f, blendMode %f, isFBTexture %f, isTexture %f)\n", __func__, internalState.VSFlags[0], internalState.VSFlags[1], internalState.VSFlags[2], internalState.VSFlags[3]);
 
-    setUniform("d3dViewport", bgfx::UniformType::Mat4, internalState.d3dViewMatrix);
-    setUniform("d3dProjection", bgfx::UniformType::Mat4, internalState.d3dProjectionMatrix);
-    setUniform("worldView", bgfx::UniformType::Mat4, internalState.worldViewMatrix);
-    setUniform("normalMatrix", bgfx::UniformType::Mat4, internalState.normalMatrix);
-    setUniform("viewMatrix", bgfx::UniformType::Mat4, internalState.viewMatrix);
-    setUniform("invViewMatrix", bgfx::UniformType::Mat4, internalState.invViewMatrix);
+    setUniform(RendererUniform::VS_FLAGS,  internalState.VSFlags.data());
+    setUniform(RendererUniform::FS_ALPHA_FLAGS, internalState.FSAlphaFlags.data());
+    setUniform(RendererUniform::FS_MISC_FLAGS, internalState.FSMiscFlags.data());
+    setUniform(RendererUniform::FS_HDR_FLAGS, internalState.FSHDRFlags.data());
+    setUniform(RendererUniform::FS_TEX_FLAGS, internalState.FSTexFlags.data());
+    setUniform(RendererUniform::WM_FLAGS, internalState.WMFlags.data());
+    setUniform(RendererUniform::TIME_COLOR, internalState.TimeColor.data());
+    setUniform(RendererUniform::TIME_DATA, internalState.TimeData.data());
+
+    setUniform(RendererUniform::D3D_VIEWPORT, internalState.d3dViewMatrix);
+    setUniform(RendererUniform::D3D_PROJECTION, internalState.d3dProjectionMatrix);
+    setUniform(RendererUniform::WORLD_VIEW, internalState.worldViewMatrix);
+    setUniform(RendererUniform::NORMAL_MATRIX, internalState.normalMatrix);
+    setUniform(RendererUniform::VIEW_MATRIX, internalState.viewMatrix);
+    setUniform(RendererUniform::INV_VIEW_MATRIX, internalState.invViewMatrix);
 }
 
 void Renderer::setLightingUniforms()
 {
     auto lightingState = lighting.getLightingState();
 
-    setUniform("lightingSettings", bgfx::UniformType::Vec4, lightingState.lightingSettings);
-    setUniform("lightDirData", bgfx::UniformType::Vec4, lightingState.lightDirData);
-    setUniform("lightData", bgfx::UniformType::Vec4, lightingState.lightData);
-    setUniform("ambientLightData", bgfx::UniformType::Vec4, lightingState.ambientLightData);
-    setUniform("shadowData", bgfx::UniformType::Vec4, lightingState.shadowData);
-    setUniform("fieldShadowData", bgfx::UniformType::Vec4, lightingState.fieldShadowData);
-    setUniform("materialData", bgfx::UniformType::Vec4, lightingState.materialData);
-    setUniform("materialScaleData", bgfx::UniformType::Vec4, lightingState.materialScaleData);
-    setUniform("lightingDebugData", bgfx::UniformType::Vec4, lightingState.lightingDebugData);
-    setUniform("iblData", bgfx::UniformType::Vec4, lightingState.iblData);
+    setUniform(RendererUniform::LIGHTING_SETTINGS, lightingState.lightingSettings);
+    setUniform(RendererUniform::LIGHT_DIR_DATA, lightingState.lightDirData);
+    setUniform(RendererUniform::LIGHT_DATA, lightingState.lightData);
+    setUniform(RendererUniform::AMBIENT_LIGHT_DATA, lightingState.ambientLightData);
+    setUniform(RendererUniform::SHADOW_DATA, lightingState.shadowData);
+    setUniform(RendererUniform::FIELD_SHADOW_DATA, lightingState.fieldShadowData);
+    setUniform(RendererUniform::MATERIAL_DATA, lightingState.materialData);
+    setUniform(RendererUniform::MATERIAL_SCALE_DATA, lightingState.materialScaleData);
+    setUniform(RendererUniform::LIGHTING_DEBUG_DATA, lightingState.lightingDebugData);
+    setUniform(RendererUniform::IBL_DATA, lightingState.iblData);
 
-    setUniform("lightViewProjMatrix", bgfx::UniformType::Mat4, lightingState.lightViewProjMatrix);
-    setUniform("lightViewProjTexMatrix", bgfx::UniformType::Mat4, lightingState.lightViewProjTexMatrix);
-    setUniform("lightInvViewProjTexMatrix", bgfx::UniformType::Mat4, lightingState.lightInvViewProjTexMatrix);
+    setUniform(RendererUniform::LIGHT_VIEW_PROJ_MATRIX, lightingState.lightViewProjMatrix);
+    setUniform(RendererUniform::LIGHT_VIEW_PROJ_TEX_MATRIX, lightingState.lightViewProjTexMatrix);
+    setUniform(RendererUniform::LIGHT_INV_VIEW_PROJ_TEX_MATRIX, lightingState.lightInvViewProjTexMatrix);
 }
 
 bgfx::RendererType::Enum Renderer::getUserChosenRenderer() {
@@ -276,27 +285,16 @@ bgfx::ShaderHandle Renderer::getShader(const char* filePath)
     return handle;
 }
 
-bgfx::UniformHandle Renderer::getUniform(std::string uniformName, bgfx::UniformType::Enum uniformType)
+bgfx::UniformHandle Renderer::createUniform(std::string uniformName, bgfx::UniformType::Enum uniformType)
 {
     bgfx::UniformHandle handle;
-    auto ret = bgfxUniformHandles.find(uniformName);
-
-    if (ret != bgfxUniformHandles.end())
-    {
-        handle = { (uint16_t)ret->second };
-    }
-    else
-    {
-        handle = bgfx::createUniform(uniformName.c_str(), uniformType);
-        bgfxUniformHandles[uniformName] = handle.idx;
-    }
-
+    handle = bgfx::createUniform(uniformName.c_str(), uniformType);
     return handle;
 }
 
-bgfx::UniformHandle Renderer::setUniform(const char* uniformName, bgfx::UniformType::Enum uniformType, const void* uniformValue)
+bgfx::UniformHandle Renderer::setUniform(RendererUniform uniform, const void* uniformValue)
 {
-    bgfx::UniformHandle handle = getUniform(std::string(uniformName), uniformType);
+    bgfx::UniformHandle handle = bgfxUniformHandles[uniform];
 
     if (bgfx::isValid(handle))
     {
@@ -308,15 +306,11 @@ bgfx::UniformHandle Renderer::setUniform(const char* uniformName, bgfx::UniformT
 
 void Renderer::destroyUniforms()
 {
-    for (const auto& item : bgfxUniformHandles)
+    for (const auto& handle : bgfxUniformHandles)
     {
-        bgfx::UniformHandle handle = { item.second };
-
         if (bgfx::isValid(handle))
             bgfx::destroy(handle);
     }
-
-    bgfxUniformHandles.clear();
 }
 
 void Renderer::destroyAll()
@@ -659,7 +653,7 @@ void Renderer::bindTextures()
 
                 if (flags == 0) flags = UINT32_MAX;
 
-                bgfx::setTexture(idx, getUniform("tex_" + std::to_string(idx), bgfx::UniformType::Sampler), handle, flags);
+                bgfx::setTexture(idx, bgfxTexUniformHandles[idx], handle, flags);
             }
         }
 
@@ -788,6 +782,45 @@ void Renderer::init()
         overlay.init(backendProgramHandles[RendererProgram::OVERLAY], window_size_x, window_size_y);
     }
 
+    bgfxUniformHandles[RendererUniform::VS_FLAGS] = createUniform("VSFlags", bgfx::UniformType::Vec4);
+    bgfxUniformHandles[RendererUniform::FS_ALPHA_FLAGS] = createUniform("FSAlphaFlags", bgfx::UniformType::Vec4);
+    bgfxUniformHandles[RendererUniform::FS_MISC_FLAGS] = createUniform("FSMiscFlags", bgfx::UniformType::Vec4);
+    bgfxUniformHandles[RendererUniform::FS_HDR_FLAGS] = createUniform("FSHDRFlags", bgfx::UniformType::Vec4);
+    bgfxUniformHandles[RendererUniform::FS_TEX_FLAGS] = createUniform("FSTexFlags", bgfx::UniformType::Vec4);
+    bgfxUniformHandles[RendererUniform::WM_FLAGS] = createUniform("WMFlags", bgfx::UniformType::Vec4);
+    bgfxUniformHandles[RendererUniform::TIME_COLOR] = createUniform("TimeColor", bgfx::UniformType::Vec4);
+    bgfxUniformHandles[RendererUniform::TIME_DATA] = createUniform("TimeData", bgfx::UniformType::Vec4);
+
+    bgfxUniformHandles[RendererUniform::D3D_VIEWPORT] = createUniform("d3dViewport", bgfx::UniformType::Mat4);
+    bgfxUniformHandles[RendererUniform::D3D_PROJECTION] = createUniform("d3dProjection", bgfx::UniformType::Mat4);
+    bgfxUniformHandles[RendererUniform::WORLD_VIEW] = createUniform("worldView", bgfx::UniformType::Mat4);
+    bgfxUniformHandles[RendererUniform::NORMAL_MATRIX] = createUniform("normalMatrix", bgfx::UniformType::Mat4);
+    bgfxUniformHandles[RendererUniform::VIEW_MATRIX] = createUniform("viewMatrix", bgfx::UniformType::Mat4);
+    bgfxUniformHandles[RendererUniform::INV_VIEW_MATRIX] = createUniform("invViewMatrix", bgfx::UniformType::Mat4);
+
+    bgfxUniformHandles[RendererUniform::LIGHTING_SETTINGS] = createUniform("lightingSettings", bgfx::UniformType::Vec4);
+    bgfxUniformHandles[RendererUniform::LIGHT_DIR_DATA] = createUniform("lightDirData", bgfx::UniformType::Vec4);
+    bgfxUniformHandles[RendererUniform::LIGHT_DATA] = createUniform("lightData", bgfx::UniformType::Vec4);
+    bgfxUniformHandles[RendererUniform::AMBIENT_LIGHT_DATA] = createUniform("ambientLightData", bgfx::UniformType::Vec4);
+    bgfxUniformHandles[RendererUniform::SHADOW_DATA] = createUniform("shadowData", bgfx::UniformType::Vec4);
+    bgfxUniformHandles[RendererUniform::FIELD_SHADOW_DATA] = createUniform("fieldShadowData", bgfx::UniformType::Vec4);
+    bgfxUniformHandles[RendererUniform::MATERIAL_DATA] = createUniform("materialData", bgfx::UniformType::Vec4);
+    bgfxUniformHandles[RendererUniform::MATERIAL_SCALE_DATA] = createUniform("materialScaleData", bgfx::UniformType::Vec4);
+    bgfxUniformHandles[RendererUniform::LIGHTING_DEBUG_DATA] = createUniform("lightingDebugData", bgfx::UniformType::Vec4);
+    bgfxUniformHandles[RendererUniform::IBL_DATA] = createUniform("iblData", bgfx::UniformType::Vec4);
+
+    bgfxUniformHandles[RendererUniform::LIGHT_VIEW_PROJ_MATRIX] = createUniform("lightViewProjMatrix", bgfx::UniformType::Vec4);
+    bgfxUniformHandles[RendererUniform::LIGHT_VIEW_PROJ_TEX_MATRIX] = createUniform("lightViewProjTexMatrix", bgfx::UniformType::Vec4);
+    bgfxUniformHandles[RendererUniform::LIGHT_INV_VIEW_PROJ_TEX_MATRIX] = createUniform("lightInvViewProjTexMatrix", bgfx::UniformType::Vec4);
+    bgfxUniformHandles[RendererUniform::VIEW_OFFSET_MATRIX] = createUniform("viewOffsetMatrix", bgfx::UniformType::Vec4);
+    bgfxUniformHandles[RendererUniform::INV_VIEW_OFFSET_MATRIX] = createUniform("invViewOffsetMatrix", bgfx::UniformType::Vec4);
+
+    for(int i = 0; i < RendererTextureSlot::COUNT; ++i)
+    {
+        bgfxTexUniformHandles[i] = createUniform("tex_" + std::to_string(i), bgfx::UniformType::Sampler);
+    }
+
+
     // Init Lighting
     lighting.init();
 
@@ -879,7 +912,7 @@ void Renderer::clearShadowMap()
     bgfx::touch(0);
 }
 
-void Renderer::drawToShadowMap()
+void Renderer::drawToShadowMap(bool uniformsAlreadyAttached, bool texturesAlreadyAttached)
 {
     if (trace_all || trace_renderer) ffnx_trace("Renderer::%s with backendProgram %d\n", __func__, backendProgram);
 
@@ -897,11 +930,17 @@ void Renderer::drawToShadowMap()
     bgfx::setViewTransform(0, lightingState.lightViewMatrix, lightingState.lightProjMatrix);
 
     // Set uniforms
-    setLightingUniforms();
-    setCommonUniforms();
+    if(!uniformsAlreadyAttached)
+    {
+        setLightingUniforms();
+        setCommonUniforms();
+    }
 
     // Bind textures in pipeline
-    bindTextures();
+    if (!texturesAlreadyAttached)
+    {
+        bindTextures();
+    }
 
     // Set state
     internalState.state = BGFX_STATE_DEPTH_TEST_LEQUAL | BGFX_STATE_WRITE_Z;
@@ -920,39 +959,36 @@ void Renderer::drawToShadowMap()
     bgfx::submit(0, backendProgramHandles[RendererProgram::SHADOW_MAP], 0, BGFX_DISCARD_NONE);
 };
 
-void Renderer::drawWithLighting(bool isCastShadow)
+void Renderer::drawWithLighting(bool uniformsAlreadyAttached, bool texturesAlreadyAttached, bool keepBindings)
 {
     if (trace_all || trace_renderer) ffnx_trace("Renderer::%s with backendProgram %d\n", __func__, backendProgram);
-
-    // Draw to shadowmap
-    if (isCastShadow) newRenderer.drawToShadowMap();
 
     // Set lighting program
     backendProgram = backendProgram == SMOOTH ? LIGHTING_SMOOTH : LIGHTING_FLAT;
 
     // Re-Bind shadow map with comparison sampler
-    bgfx::setTexture(RendererTextureSlot::TEX_S, getUniform("tex_" + std::to_string(RendererTextureSlot::TEX_S), bgfx::UniformType::Sampler), bgfx::getTexture(shadowMapFrameBuffer));
+    bgfx::setTexture(RendererTextureSlot::TEX_S, bgfxTexUniformHandles[RendererTextureSlot::TEX_S], bgfx::getTexture(shadowMapFrameBuffer));
 
     // Bind specular IBL cubemap
     if (bgfx::isValid(specularIblTexture))
     {
-        bgfx::setTexture(RendererTextureSlot::TEX_IBL_SPEC, getUniform("tex_" + std::to_string(RendererTextureSlot::TEX_IBL_SPEC), bgfx::UniformType::Sampler), specularIblTexture);
+        bgfx::setTexture(RendererTextureSlot::TEX_IBL_SPEC, bgfxTexUniformHandles[RendererTextureSlot::TEX_IBL_SPEC], specularIblTexture);
     }
 
     // Bind diffuse IBL cubemap
     if (bgfx::isValid(diffuseIblTexture))
     {
-        bgfx::setTexture(RendererTextureSlot::TEX_IBL_DIFF, getUniform("tex_" + std::to_string(RendererTextureSlot::TEX_IBL_DIFF), bgfx::UniformType::Sampler), diffuseIblTexture);
+        bgfx::setTexture(RendererTextureSlot::TEX_IBL_DIFF, bgfxTexUniformHandles[RendererTextureSlot::TEX_IBL_DIFF], diffuseIblTexture);
     }
 
     // Bind environment BRDF texture
     if (bgfx::isValid(envBrdfTexture))
     {
-        bgfx::setTexture(RendererTextureSlot::TEX_BRDF, getUniform("tex_" + std::to_string(RendererTextureSlot::TEX_BRDF), bgfx::UniformType::Sampler), envBrdfTexture, BGFX_SAMPLER_U_CLAMP | BGFX_SAMPLER_V_CLAMP);
+        bgfx::setTexture(RendererTextureSlot::TEX_BRDF, bgfxTexUniformHandles[RendererTextureSlot::TEX_BRDF], envBrdfTexture, BGFX_SAMPLER_U_CLAMP | BGFX_SAMPLER_V_CLAMP);
     }
 
     // Draw with lighting
-    draw(isCastShadow);
+    draw(uniformsAlreadyAttached, texturesAlreadyAttached, keepBindings);
 }
 
 void Renderer::drawFieldShadow()
@@ -960,15 +996,15 @@ void Renderer::drawFieldShadow()
     backendProgram = RendererProgram::FIELD_SHADOW;
 
     // Re-Bind shadow map with comparison sampler
-    bgfx::setTexture(RendererTextureSlot::TEX_S, getUniform("tex_" + std::to_string(RendererTextureSlot::TEX_S), bgfx::UniformType::Sampler), bgfx::getTexture(shadowMapFrameBuffer));
+    bgfx::setTexture(RendererTextureSlot::TEX_S, bgfxTexUniformHandles[RendererTextureSlot::TEX_S], bgfx::getTexture(shadowMapFrameBuffer));
 
     // Re-Bind shadow map for direct depth sampling
-    bgfx::setTexture(RendererTextureSlot::TEX_D, getUniform("tex_" + std::to_string(RendererTextureSlot::TEX_D), bgfx::UniformType::Sampler), bgfx::getTexture(shadowMapFrameBuffer), BGFX_TEXTURE_RT | BGFX_SAMPLER_POINT | BGFX_SAMPLER_U_CLAMP | BGFX_SAMPLER_V_CLAMP | BGFX_SAMPLER_W_CLAMP);
+    bgfx::setTexture(RendererTextureSlot::TEX_D, bgfxTexUniformHandles[RendererTextureSlot::TEX_D], bgfx::getTexture(shadowMapFrameBuffer), BGFX_TEXTURE_RT | BGFX_SAMPLER_POINT | BGFX_SAMPLER_U_CLAMP | BGFX_SAMPLER_V_CLAMP | BGFX_SAMPLER_W_CLAMP);
 
     draw();
 }
 
-void Renderer::draw(bool uniformsAlreadyAttached)
+void Renderer::draw(bool uniformsAlreadyAttached, bool texturesAlreadyAttached, bool keepBindings)
 {
     if (trace_all || trace_renderer) ffnx_trace("Renderer::%s with backendProgram %d\n", __func__, backendProgram);
 
@@ -993,7 +1029,6 @@ void Renderer::draw(bool uniformsAlreadyAttached)
         bgfx::setViewTransform(backendViewId, NULL, internalState.backendProjMatrix);
     }
 
-
     // Skip uniform attachment as it has been done already
     if (!uniformsAlreadyAttached)
     {
@@ -1002,7 +1037,10 @@ void Renderer::draw(bool uniformsAlreadyAttached)
     }
 
     // Bind textures in pipeline
-    bindTextures();
+    if (!texturesAlreadyAttached)
+    {
+        bindTextures();
+    }
 
     // Set state
     {
@@ -1055,7 +1093,8 @@ void Renderer::draw(bool uniformsAlreadyAttached)
     }
     bgfx::setState(internalState.state);
 
-    bgfx::submit(backendViewId, backendProgramHandles[backendProgram]);
+    auto flags = keepBindings ? BGFX_DISCARD_STATE : BGFX_DISCARD_ALL;
+    bgfx::submit(backendViewId, backendProgramHandles[backendProgram], 0, flags);
 
     internalState.bHasDrawBeenDone = true;
     internalState.bTexturesBound = false;
@@ -1182,6 +1221,88 @@ void Renderer::bindIndexBuffer(WORD* inIndex, uint32_t inCount)
 
     bgfx::setIndexBuffer(indexBufferHandle, currentOffset, inCount);
 };
+
+void Renderer::fillExternalMeshVertexBuffer(struct nvertex* inVertex, struct vector3<float>* normals, uint32_t inCount)
+{
+    if (!bgfx::isValid(field3dVertexBufferHandle)) field3dVertexBufferHandle = bgfx::createDynamicVertexBuffer(inCount, vertexLayout, BGFX_BUFFER_ALLOW_RESIZE);
+
+    uint32_t currentOffset = externalMeshVertexBufferData.size();
+
+    for (uint32_t idx = 0; idx < inCount; idx++)
+    {
+        externalMeshVertexBufferData.push_back(Vertex());
+
+        externalMeshVertexBufferData[currentOffset + idx].x = inVertex[idx]._.x;
+        externalMeshVertexBufferData[currentOffset + idx].y = inVertex[idx]._.y;
+        externalMeshVertexBufferData[currentOffset + idx].z = inVertex[idx]._.z;
+        externalMeshVertexBufferData[currentOffset + idx].w = (::isinf(inVertex[idx].color.w) ? 1.0f : inVertex[idx].color.w);
+        externalMeshVertexBufferData[currentOffset + idx].bgra = inVertex[idx].color.color;
+        externalMeshVertexBufferData[currentOffset + idx].u = inVertex[idx].u;
+        externalMeshVertexBufferData[currentOffset + idx].v = inVertex[idx].v;
+
+        if (normals)
+        {
+            externalMeshVertexBufferData[currentOffset + idx].nx = normals[idx].x;
+            externalMeshVertexBufferData[currentOffset + idx].ny = normals[idx].y;
+            externalMeshVertexBufferData[currentOffset + idx].nz = normals[idx].z;
+        }
+
+        if (vertex_log && idx == 0) ffnx_trace("%s: %u [XYZW(%f, %f, %f, %f), BGRA(%08x), UV(%f, %f)]\n", __func__, idx, externalMeshVertexBufferData[currentOffset + idx].x, externalMeshVertexBufferData[currentOffset + idx].y, externalMeshVertexBufferData[currentOffset + idx].z, externalMeshVertexBufferData[currentOffset + idx].w, externalMeshVertexBufferData[currentOffset + idx].bgra, externalMeshVertexBufferData[currentOffset + idx].u, externalMeshVertexBufferData[currentOffset + idx].v);
+        if (vertex_log && idx == 1) ffnx_trace("%s: See the rest on RenderDoc.\n", __func__);
+    }
+};
+
+void Renderer::fillExternalMeshIndexBuffer(uint32_t* inIndex, uint32_t inCount)
+{
+    if (!bgfx::isValid(field3dIndexBufferHandle)) field3dIndexBufferHandle = bgfx::createDynamicIndexBuffer(inCount, BGFX_BUFFER_ALLOW_RESIZE | BGFX_BUFFER_INDEX32);
+
+    uint32_t currentOffset = field3dIndexBufferData.size();
+
+    for (uint32_t idx = 0; idx < inCount; idx++)
+    {
+        field3dIndexBufferData.push_back(inIndex[idx]);
+    }
+};
+
+void Renderer::updateExternalMeshBuffers()
+{
+    bgfx::update(
+        field3dVertexBufferHandle,
+        0,
+        bgfx::copy(
+            externalMeshVertexBufferData.data(),
+            vectorSizeOf(externalMeshVertexBufferData)
+        )
+    );
+
+    bgfx::update(
+        field3dIndexBufferHandle,
+        0,
+        bgfx::copy(
+            field3dIndexBufferData.data(),
+            vectorSizeOf(field3dIndexBufferData)
+        )
+    );
+}
+
+void Renderer::bindField3dVertexBuffer(uint32_t offset, uint32_t inCount)
+{
+    bgfx::setVertexBuffer(0, field3dVertexBufferHandle, offset, inCount);
+}
+
+void Renderer::bindField3dIndexBuffer(uint32_t offset, uint32_t inCount)
+{
+    bgfx::setIndexBuffer(field3dIndexBufferHandle, offset, inCount);
+}
+
+void Renderer::clearExternalMesh3dBuffers()
+{
+    externalMeshVertexBufferData.clear();
+    externalMeshVertexBufferData.shrink_to_fit();
+
+    field3dIndexBufferData.clear();
+    field3dIndexBufferData.shrink_to_fit();
+}
 
 void Renderer::setScissor(uint16_t x, uint16_t y, uint16_t width, uint16_t height)
 {
@@ -1938,24 +2059,27 @@ float* Renderer::getViewMatrix()
     return internalState.viewMatrix;
 }
 
-void Renderer::setWorldViewMatrix(struct matrix *matrix)
+void Renderer::setWorldViewMatrix(struct matrix *matrix, bool calculateNormalMatrix)
 {
     ::memcpy(internalState.worldViewMatrix, &matrix->m[0][0], sizeof(matrix->m));
 
     if (uniform_log) printMatrix(__func__, internalState.worldViewMatrix);
 
-    struct matrix transpose;
-    transpose_matrix(matrix, &transpose);
-    struct matrix invTranspose;
-    inverse_matrix(&transpose, &invTranspose);
-    invTranspose._41 = 0.0;
-    invTranspose._42 = 0.0;
-    invTranspose._43 = 0.0;
-    invTranspose._44 = 1.0;
+    if(calculateNormalMatrix)
+    {
+        struct matrix transpose;
+        transpose_matrix(matrix, &transpose);
+        struct matrix invTranspose;
+        inverse_matrix(&transpose, &invTranspose);
+        invTranspose._41 = 0.0;
+        invTranspose._42 = 0.0;
+        invTranspose._43 = 0.0;
+        invTranspose._44 = 1.0;
 
-    ::memcpy(internalState.normalMatrix, &invTranspose.m[0][0], sizeof(invTranspose.m));
+        ::memcpy(internalState.normalMatrix, &invTranspose.m[0][0], sizeof(invTranspose.m));
 
-    if (uniform_log) printMatrix(__func__, internalState.normalMatrix);
+        if (uniform_log) printMatrix(__func__, internalState.normalMatrix);
+    }
 };
 
 void Renderer::setD3DViweport(struct matrix* matrix)
@@ -1975,6 +2099,22 @@ void Renderer::setD3DProjection(struct matrix* matrix)
         float widescreenScale = round(float(game_width) / wide_viewport_width * 100) / 100.f;
         internalState.d3dProjectionMatrix[0] *= widescreenScale;
         internalState.d3dProjectionMatrix[8] *= widescreenScale;
+    }
+
+    if (enable_external_mesh)
+    {
+        struct game_mode* mode = getmode_cached();
+        if(mode->driver_mode == MODE_WORLDMAP)
+        {
+            float a = internalState.d3dProjectionMatrix[10];
+            float b = internalState.d3dProjectionMatrix[11];
+
+            float f = b / (a + 1.0f) + f_offset;
+            float n = b / (a - 1.0f) + n_offset;
+
+            internalState.d3dProjectionMatrix[10] = -(f + n) / (f -n);
+            internalState.d3dProjectionMatrix[11] = -(2*f*n) / (f - n);
+        }
     }
 
     if (uniform_log) printMatrix(__func__, internalState.d3dProjectionMatrix);
@@ -2018,4 +2158,304 @@ void Renderer::setTimeFilterEnabled(bool flag)
 bool Renderer::isTimeFilterEnabled()
 {
     return static_cast<bool>(internalState.TimeData[1]);
+}
+
+bool Renderer::importExternalMeshGltfFile(char* file_path, char* tex_path, std::vector<struct Shape>& outShapes, std::map<std::string, bgfx::TextureHandle>& outTextures)
+{
+	cgltf_options options = {0};
+	cgltf_data* data = NULL;
+	cgltf_result result = cgltf_parse_file(&options, file_path, &data);
+	if (result != cgltf_result_success)
+	{
+		outShapes.clear();
+		return false;
+	}
+
+	result = cgltf_load_buffers(&options, data, file_path);
+	if (result != cgltf_result_success)
+	{
+		outShapes.clear();
+		return false;
+	}
+
+	for (size_t i = 0; i < data->textures_count; i++)
+	{
+		auto texture = data->textures[i];
+		std::string relativePath = texture.image->uri;
+
+		std::string filename = relativePath.substr(relativePath.find_last_of("/") + 1);
+		std::string name = filename.substr(0, filename.find_last_of("."));
+
+		std::string texFullPath = tex_path + name + ".dds";
+
+		uint32_t width, height, mipCount = 0;
+		outTextures.emplace(name, newRenderer.createTextureHandle(texFullPath.data(), &width, &height, &mipCount, true));
+
+		std::string nmlTexFullPath = tex_path + name + "_nml.dds";
+		auto nmlTextureHandle = newRenderer.createTextureHandle(nmlTexFullPath.data(), &width, &height, &mipCount, false);
+		if(bgfx::isValid(nmlTextureHandle))
+		{
+			outTextures.emplace(name + "_nml", nmlTextureHandle);
+		}
+
+		std::string pbrTexFullPath = tex_path + name + "_pbr.dds";
+		auto pbrTextureHandle = newRenderer.createTextureHandle(pbrTexFullPath.data(), &width, &height, &mipCount, false);
+		if(bgfx::isValid(pbrTextureHandle))
+		{
+			outTextures.emplace(name + "_pbr", pbrTextureHandle);
+		}
+	}
+
+	float scale = 1.0f;
+	for (size_t i = 0; i < data->meshes_count; i++)
+	{
+		cgltf_mesh mesh = data->meshes[i];
+
+		for (size_t j = 0; j < mesh.primitives_count; j++)
+		{
+			Shape outShape;
+
+			cgltf_primitive primitive = mesh.primitives[j];
+			auto indexCount = primitive.indices->count;
+			auto vertexCount = 0;
+
+			float* posBuffer = nullptr;
+			float* normalBuffer = nullptr;
+			float* uvBuffer = nullptr;
+			float* colorBuffer = nullptr;
+			for (size_t k = 0; k < primitive.attributes_count; k++)
+			{
+				cgltf_attribute attr = primitive.attributes[k];
+
+				if(strcmp(attr.name, "POSITION") == 0)
+				{
+					vertexCount = attr.data->count;
+					posBuffer = (float*)((char*)attr.data->buffer_view->buffer->data + attr.data->buffer_view->offset);
+					outShape.min.x = attr.data->min[0];
+					outShape.min.y = attr.data->min[1];
+					outShape.min.z = attr.data->min[2];
+					outShape.max.x = attr.data->max[0];
+					outShape.max.y = attr.data->max[1];
+					outShape.max.z = attr.data->max[2];
+				}
+				else if(strcmp(attr.name, "NORMAL") == 0)
+				{
+					normalBuffer = (float*)((char*)attr.data->buffer_view->buffer->data + attr.data->buffer_view->offset);
+				}
+				else if(strcmp(attr.name, "TEXCOORD_0") == 0)
+				{
+					uvBuffer = (float*)((char*)attr.data->buffer_view->buffer->data + attr.data->buffer_view->offset);
+				}
+				else if(strcmp(attr.name, "COLOR_0") == 0)
+				{
+					colorBuffer = (float*)((char*)attr.data->buffer_view->buffer->data + attr.data->buffer_view->offset);
+				}
+			}
+
+			auto texture = primitive.material->pbr_metallic_roughness.base_color_texture.texture;
+			if(texture != nullptr)
+			{
+				std::string texName = texture->image->name;
+				if(textures.contains(texName)) outShape.baseColorTexHandle = textures[texName];
+
+				auto nmlTexName = texName + "_nml";
+				if(textures.contains(nmlTexName)) outShape.normalTexHandle = textures[nmlTexName];
+
+				auto pbrTexName = texName + "_pbr";
+				if(textures.contains(pbrTexName)) outShape.pbrTexHandle = textures[pbrTexName];
+			}
+			auto baseColorFactor = primitive.material->pbr_metallic_roughness.base_color_factor;
+			for (int vertexIndex = 0; vertexIndex < vertexCount; vertexIndex++)
+			{
+				struct nvertex vertex;
+				vertex._.x = posBuffer[3 * vertexIndex] * scale;
+				vertex._.y = posBuffer[3 * vertexIndex + 2] * scale;
+				vertex._.z = posBuffer[3 * vertexIndex + 1] * scale;
+
+				vertex.color.w = 1.0f;
+				vertex.color.r = static_cast<char>(baseColorFactor[0] * 255);
+				vertex.color.g = static_cast<char>(baseColorFactor[1] * 255);
+				vertex.color.b = static_cast<char>(baseColorFactor[2] * 255);
+				vertex.color.a = static_cast<char>(baseColorFactor[3] * 255);
+
+				vertex.u = uvBuffer[2 * vertexIndex];
+				vertex.v = uvBuffer[2 * vertexIndex + 1];
+
+				outShape.vertices.push_back(vertex);
+
+				struct vector3<float> normal;
+
+				normal.x = normalBuffer[3 * vertexIndex];
+				normal.y = normalBuffer[3 * vertexIndex + 2];
+				normal.z = normalBuffer[3 * vertexIndex + 1];
+
+				outShape.normals.push_back(normal);
+			}
+
+			if(primitive.indices->component_type == cgltf_component_type_r_16u)
+			{
+				auto indexBuffer = (unsigned short*)((char*)primitive.indices->buffer_view->buffer->data + primitive.indices->buffer_view->offset);
+
+				for (int id = 0; id < indexCount; ++id)
+				{
+					outShape.indices.push_back(indexBuffer[id]);
+				}
+			}else if(primitive.indices->component_type == cgltf_component_type_r_32u)
+			{
+				auto indexBuffer = (unsigned int*)((char*)primitive.indices->buffer_view->buffer->data + primitive.indices->buffer_view->offset);
+				for (int id = 0; id < indexCount; ++id)
+				{
+					outShape.indices.push_back(indexBuffer[id]);
+				}
+			}
+
+			outShapes.push_back(outShape);
+		}
+	}
+
+	return true;
+}
+
+void Renderer::setApplySphericalWorld(bool flag)
+{
+    internalState.bIsApplySphericalWorld = flag;
+}
+
+bool Renderer::loadWorldMapExternalMesh()
+{
+	if (externalMeshVertexBufferData.size() == 0)
+	{
+		shapes.clear();
+		textures.clear();
+		clearExternalMesh3dBuffers();
+
+		char file_path_gltf[MAX_PATH];
+		sprintf(file_path_gltf, "%s/%s/world/wm0.gltf", basedir, external_mesh_path.data());
+
+		char tex_path[MAX_PATH];
+		sprintf(tex_path, "%s/%s/world/textures/", basedir, external_mesh_path.data());
+
+		if (!importExternalMeshGltfFile(file_path_gltf, tex_path, shapes, textures)) return false;
+
+		auto shapeCount = shapes.size();
+		for (int i = 0; i < shapeCount; i++)
+		{
+			auto& shape = shapes[i];
+			newRenderer.fillExternalMeshVertexBuffer(shape.vertices.data(), shape.normals.data(), shape.vertices.size());
+			newRenderer.fillExternalMeshIndexBuffer(shape.indices.data(), shape.indices.size());
+		}
+
+		newRenderer.updateExternalMeshBuffers();
+	}
+
+	if(shapes.size() > 0) return true;
+	else return false;
+}
+
+bool Renderer::drawWorldMapExternalMesh()
+{
+	auto shapeCount = shapes.size();
+	int vertexOffset = 0;
+	int indexOffset = 0;
+
+	int world_pos_x = ((int*)(0xE04918))[0];
+	int world_pos_y = ((int*)(0xE04918))[1];
+	int world_pos_z = ((int*)(0xE04918))[2];
+
+    struct matrix viewMatrix;
+    memcpy(viewMatrix.m, internalState.viewMatrix, sizeof(viewMatrix.m));
+
+	// Create a world matrix
+	struct matrix worldViewMatrix[9];
+	for (int gridX = -1; gridX <= 1; gridX++)
+	{
+		for (int gridZ = -1; gridZ <= 1; gridZ++)
+		{
+			struct matrix worldMatrix;
+			identity_matrix(&worldMatrix);
+			worldMatrix._41 = gridX * 294912;
+			worldMatrix._43 = gridZ * 229376;
+			multiply_matrix(&worldMatrix, &viewMatrix, &worldViewMatrix[3 * (gridX + 1) + gridZ + 1]);
+		}
+	}
+
+	resetState();
+	setPrimitiveType();
+	isTLVertex(false);
+	setCullMode(RendererCullMode::BACK);
+	setBlendMode(RendererBlendMode::BLEND_NONE);
+    doTextureFiltering(true);
+    isExternalTexture(true);
+	isTexture(true);
+	doDepthTest(true);
+	doDepthWrite(true);
+
+	setWorldViewMatrix(&worldViewMatrix[0]);
+	setCommonUniforms();
+	if (enable_lighting) setLightingUniforms();
+
+	const float maxDist = 200000.0f * 200000.0f;
+	for (int i = 0; i < shapeCount; ++i)
+	{
+		auto& shape = shapes[i];
+
+		vector2<float> center;
+		center.x = 0.5f * (shape.max.x + shape.min.x);
+		center.y = 0.5f * (shape.max.y + shape.min.y);
+
+		bool commonBindingSet = false;
+		for (int gridX = -1; gridX <= 1; ++gridX)
+		{
+			for (int gridZ = -1; gridZ <= 1; ++gridZ)
+			{
+				vector2<float> centerShifted;
+				centerShifted.x = center.x + gridX * 294912;
+				centerShifted.y = center.y + gridZ * 229376;
+
+				vector2<float> diff;
+				diff.x = world_pos_x - centerShifted.x;
+				diff.y = world_pos_z - centerShifted.y;
+
+				float sqrDist = diff.x * diff.x + diff.y * diff.y;
+				if (sqrDist > maxDist)
+				{
+					continue;
+				}
+
+				setWorldViewMatrix(&worldViewMatrix[3 * (gridX + 1) + gridZ + 1], false);
+				setUniform(RendererUniform::WORLD_VIEW, internalState.worldViewMatrix);
+
+				if(!commonBindingSet)
+				{
+					bindField3dVertexBuffer(vertexOffset, shape.vertices.size());
+					bindField3dIndexBuffer(indexOffset, shape.indices.size());
+
+					if(bgfx::isValid(shape.baseColorTexHandle))
+						useTexture(shape.baseColorTexHandle.idx, RendererTextureSlot::TEX_Y);
+					else useTexture(0, RendererTextureSlot::TEX_Y);
+
+					if(bgfx::isValid(shape.normalTexHandle))
+						useTexture(shape.normalTexHandle.idx, RendererTextureSlot::TEX_NML);
+					else useTexture(0, RendererTextureSlot::TEX_NML);
+
+					if(bgfx::isValid(shape.pbrTexHandle))
+						useTexture(shape.pbrTexHandle.idx, RendererTextureSlot::TEX_PBR);
+					else useTexture(0, RendererTextureSlot::TEX_PBR);
+
+					bindTextures();
+
+					commonBindingSet = true;
+				}
+
+				drawToShadowMap(true, true);
+				drawWithLighting(true, true, true);
+			}
+		}
+
+		vertexOffset += shape.vertices.size();
+		indexOffset += shape.indices.size();
+	}
+
+	if(shapeCount > 0) return true;
+	else return false;
 }

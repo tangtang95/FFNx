@@ -111,6 +111,16 @@ enable_time_cycle = false
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~
 external_time_cycle_path = "time"
 
+#[EXTERNAL MESH]
+# Enable external meshes.
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~
+enable_external_mesh = false
+
+#[EXTERNAL MESH PATH]
+# Path for external mesh files.
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~
+external_mesh_path = "mesh"
+
 #[HDR]
 # This flag will set the Maximum Luminance nits value of your monitor/TV in order to properly correct colors when rendering.
 # By default is set to 0, which means use what has been autodetected via software.

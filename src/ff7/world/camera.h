@@ -20,16 +20,61 @@
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         //
 //    GNU General Public License for more details.                          //
 /****************************************************************************/
-
 #pragma once
 
-#include "renderer.h"
+#include "../../common.h"
+
+#include <bx/math.h>
+#include <bx/bx.h>
 
 namespace ff7::world
 {
-    void world_hook_init();
-    void world_update_model_movement(int delta_position_x, int delta_position_z);
+    enum world_camera_viewtype
+    {
+        TOP_DOWN_VIEW = 0,
+        FRONT_VIEW = 2,
+        HIGHWIND_VIEW = 3
+    };
 
-    void update_world_camera(short world_camera_rotation_y);
-    void update_player_and_handle_input();
+    void update_world_camera_front(int current_key_input, int prev_key_input);
+    void update_world_camera_rotation_y();
+
+    class WorldCamera
+    {
+        public:
+            WorldCamera() = default;
+            ~WorldCamera() = default;
+
+            void setRotationSpeed(float rotX, float rotY, float rotZ);
+            vector3<float> getRotationSpeed();
+            void setZoomSpeed(float speed);
+            float getZoomSpeed();
+            void reset();
+
+            void controlCamera(vector3<short>* cameraPosition, vector3<short>* cameraFocusPosition);
+            void controlWmCamera(bx::Vec3* cameraPosition, const bx::Vec3& cameraFocusPosition, float initialDist);
+        public:
+            vector3<float> rotationOffset = { -85, 0.0, 0.0 };
+            float zoomOffset = 0.0f;
+            const float minZoomDist = 2000.0f;
+            const float maxZoomDist = 10000.0f;
+        private:
+            vector3<float> rotationSpeed = { 0.0, 0.0, 0.0 };
+            float zoomSpeed = 0.0f;
+
+            const float minVerticalAngle = 5.0f;
+            const float maxVerticalAngle = 85.0f;
+    };
+
+    inline vector3<float> WorldCamera::getRotationSpeed()
+    {
+        return rotationSpeed;
+    }
+
+    inline float WorldCamera::getZoomSpeed()
+    {
+        return zoomSpeed;
+    }
+
+    extern WorldCamera camera;
 }

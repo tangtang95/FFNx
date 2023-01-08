@@ -47,6 +47,7 @@ std::vector<std::string> external_ambient_ext;
 std::string external_lighting_path;
 std::string external_widescreen_path;
 std::string external_time_cycle_path;
+std::string external_mesh_path;
 bool enable_voice_music_fade;
 long external_voice_music_fade_volume;
 bool enable_voice_auto_text;
@@ -89,6 +90,7 @@ bool enable_anisotropic;
 bool enable_lighting;
 bool prefer_lighting_cpu_calculations;
 bool enable_time_cycle;
+bool enable_external_mesh;
 bool ff7_external_opening_music;
 bool more_debug;
 bool ff8_ssigpu_debug;
@@ -193,6 +195,7 @@ void read_cfg()
 	external_lighting_path = config["external_lighting_path"].value_or("");
 	external_widescreen_path = config["external_widescreen_path"].value_or("");
 	external_time_cycle_path = config["external_time_cycle_path"].value_or("");
+	external_mesh_path = config["external_mesh_path"].value_or("");
 	save_textures = config["save_textures"].value_or(false);
 	trace_all = config["trace_all"].value_or(false);
 	trace_renderer = config["trace_renderer"].value_or(false);
@@ -232,6 +235,7 @@ void read_cfg()
 	enable_lighting = config["enable_lighting"].value_or(false);
 	prefer_lighting_cpu_calculations = config["prefer_lighting_cpu_calculations"].value_or(true);
 	enable_time_cycle = config["enable_time_cycle"].value_or(false);
+	enable_external_mesh = config["enable_external_mesh"].value_or(false);
 	ff7_external_opening_music = config["ff7_external_opening_music"].value_or(false);
 	more_debug = config["more_debug"].value_or(false);
 	ff8_ssigpu_debug = config["ff8_ssigpu_debug"].value_or(false);
@@ -423,6 +427,10 @@ void read_cfg()
 	// EXTERNAL TIME CYCLE
 	if (external_time_cycle_path.empty())
 		external_time_cycle_path = "time";
+
+	// EXTERNAL MESH
+	if (external_mesh_path.empty())
+		external_mesh_path = "mesh";
 
 	// MOD PATH
 	if (mod_path.empty())
