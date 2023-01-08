@@ -27,6 +27,22 @@
 
 namespace ff7::world {
 
+    void init_load_wm_bot_blocks() {
+        ff7_externals.world_init_load_wm_bot_block_7533AF();
+    }
+
+    void wm0_overworld_draw_all() {
+        ff7_externals.world_wm0_overworld_draw_all_74C179();
+    }
+
+    void wm2_underwater_draw_all() {
+        ff7_externals.world_wm2_underwater_draw_all_74C3F0();
+    }
+
+    void wm3_snowstorm_draw_all() {
+        ff7_externals.world_wm3_snowstorm_draw_all_74C589();
+    }
+
     // This draw call is the first UI call that marks the start of the first UI draw section
     void wm0_draw_minimap_quad_graphics_object(ff7_graphics_object* quad_graphics_object, ff7_game_obj* game_object) {
         newRenderer.setTimeFilterEnabled(false);

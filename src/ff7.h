@@ -2998,6 +2998,7 @@ struct ff7_externals
 	uint32_t world_mode_loop_sub_74DB8C;
 	uint32_t world_init_variables_74E1E9;
 	uint32_t world_sub_7641A7;
+	void (*world_init_load_wm_bot_block_7533AF)();
 	uint32_t run_world_event_scripts;
 	uint32_t run_world_event_scripts_system_operations;
 	uint32_t world_animate_all_models;
@@ -3057,6 +3058,7 @@ struct ff7_externals
 	int* world_unk_rotation_value_E045E0;
 	world_event_data** world_event_current_entity_ptr_E39AD8;
 	world_event_data** world_event_current_entity_ptr_E3A7CC;
+	int* world_progress_E28CB4;
 	int* is_wait_frames_zero_E39BC0;
 	int* world_prev_key_input_status_DFC470;
 	int* world_map_type_E045E8;
@@ -3077,7 +3079,9 @@ struct ff7_externals
 	uint32_t world_sub_75A1C6;
 	uint32_t world_load_graphics_objects_75A5D5;
 	uint32_t world_init_load_map_meshes_graphics_objects_75A283;
-	uint32_t world_wm0_overworld_draw_all_74C179;
+	void (*world_wm0_overworld_draw_all_74C179)();
+	void (*world_wm2_underwater_draw_all_74C3F0)();
+	void (*world_wm3_snowstorm_draw_all_74C589)();
 	uint32_t world_draw_fade_quad_75551A;
 	uint32_t world_sub_75079D;
 	uint32_t world_sub_751EFC;

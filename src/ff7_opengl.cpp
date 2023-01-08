@@ -306,6 +306,17 @@ void ff7_init_hooks(struct game_obj *_game_object)
 	{
 		replace_function(ff7_externals.world_update_camera_74E8CE, ff7::world::update_world_camera);
 		replace_function(ff7_externals.world_update_player_74EA48, ff7::world::update_player_and_handle_input);
+
+		replace_call_function(ff7_externals.world_mode_loop_sub_74DB8C + 0x296, ff7::world::init_load_wm_bot_blocks);
+
+		patch_code_dword(ff7_externals.world_init_load_map_meshes_graphics_objects_75A283 + 0xA7, (DWORD)&ff7::world::wm0_overworld_draw_all);
+		patch_code_dword(ff7_externals.world_init_load_map_meshes_graphics_objects_75A283 + 0xDF, (DWORD)&ff7::world::wm2_underwater_draw_all);
+		patch_code_dword(ff7_externals.world_init_load_map_meshes_graphics_objects_75A283 + 0x117, (DWORD)&ff7::world::wm3_snowstorm_draw_all);
+
+		// Remove world meshes draw calls by jumping to end of loop
+		patch_code_byte((uint32_t)ff7_externals.world_wm0_overworld_draw_all_74C179 + 0x32, 0x76);
+		patch_code_byte((uint32_t)ff7_externals.world_wm2_underwater_draw_all_74C3F0 + 0x32, 0x2D);
+		patch_code_byte((uint32_t)ff7_externals.world_wm3_snowstorm_draw_all_74C589 + 0x32, 0x2D);
 	}
 
 	//######################
@@ -328,9 +339,9 @@ void ff7_init_hooks(struct game_obj *_game_object)
 		replace_call_function(ff7_externals.battle_draw_text_ui_graphics_objects_call, ff7::battle::draw_ui_graphics_objects_wrapper);
 		replace_call_function(ff7_externals.battle_draw_box_ui_graphics_objects_call, ff7::battle::draw_ui_graphics_objects_wrapper);
 
-		replace_call_function(ff7_externals.world_wm0_overworld_draw_all_74C179 + 0x175, ff7::world::wm0_draw_minimap_quad_graphics_object);
-		replace_call_function(ff7_externals.world_wm0_overworld_draw_all_74C179 + 0x1BE, ff7::world::wm0_draw_world_effects_1_graphics_object);
-		replace_call_function(ff7_externals.world_wm0_overworld_draw_all_74C179 + 0x208, ff7::world::wm0_draw_minimap_points_graphics_object);
+		replace_call_function((uint32_t)ff7_externals.world_wm0_overworld_draw_all_74C179 + 0x175, ff7::world::wm0_draw_minimap_quad_graphics_object);
+		replace_call_function((uint32_t)ff7_externals.world_wm0_overworld_draw_all_74C179 + 0x1BE, ff7::world::wm0_draw_world_effects_1_graphics_object);
+		replace_call_function((uint32_t)ff7_externals.world_wm0_overworld_draw_all_74C179 + 0x208, ff7::world::wm0_draw_minimap_points_graphics_object);
 	}
 
 	//#############################

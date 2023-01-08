@@ -27,6 +27,12 @@
 
 namespace ff7::world {
 
+    void init_load_wm_bot_blocks();
+
+    void wm0_overworld_draw_all();
+    void wm2_underwater_draw_all();
+    void wm3_snowstorm_draw_all();
+
     void wm0_draw_minimap_quad_graphics_object(ff7_graphics_object* quad_graphics_object, ff7_game_obj* game_object);
     void wm0_draw_world_effects_1_graphics_object(ff7_graphics_object* world_effects_1_graphics_object, ff7_game_obj* game_object);
     void wm0_draw_minimap_points_graphics_object(ff7_graphics_object* minimap_points_graphics_object, ff7_game_obj* game_object);
