@@ -693,8 +693,8 @@ struct ff8_game_obj
 	struct list *list_2E8;
 	struct polygon_set *polygon_set_2EC;
 	struct polygon_set *polygon_set_2F0;
-	struct stack *matrix_stack1;
-	struct stack *matrix_stack2;
+	void *matrix_stack1;
+	void *matrix_stack2;
 	struct matrix *camera_matrix;
 	struct graphics_instance *graphics_instance;
 	uint32_t field_304;
@@ -742,7 +742,7 @@ struct ff8_game_obj
 	struct matrix matrix_8D0;
 	void *dx_sfx_something;
 	struct list *tex_list_pointer;
-	struct stack *stack_918;
+	void *stack_918;
 	uint32_t field_91C;
 	void *_3d2d_something;
 	uint32_t field_924;

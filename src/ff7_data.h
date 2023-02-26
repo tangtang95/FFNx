@@ -375,9 +375,9 @@ void ff7_find_externals(struct ff7_game_obj* game_object)
 	ff7_externals.kernel_1to9_sections = (char**)get_absolute_value(ff7_externals.sub_4012DA, 0x6F);
 
 	ff7_externals.draw_3d_model = get_relative_call(ff7_externals.field_draw_everything, 0x17F);
-	ff7_externals.stack_push = (void (*)(struct stack*))get_relative_call(ff7_externals.draw_3d_model, 0x8E);
-	ff7_externals.stack_top = (void* (*)(struct stack*))get_relative_call(ff7_externals.draw_3d_model, 0x9A);
-	ff7_externals.stack_pop = (void (*)(struct stack*))get_relative_call(ff7_externals.draw_3d_model, 0x8FD);
+	ff7_externals.stack_push = (void (*)(void*))get_relative_call(ff7_externals.draw_3d_model, 0x8E);
+	ff7_externals.stack_top = (void* (*)(void*))get_relative_call(ff7_externals.draw_3d_model, 0x9A);
+	ff7_externals.stack_pop = (void (*)(void*))get_relative_call(ff7_externals.draw_3d_model, 0x8FD);
 	ff7_externals._root_animation = (void (*)(matrix*, anim_frame*, anim_header*, hrc_data*))get_absolute_value(ff7_externals.draw_3d_model, 0xD4);
 	ff7_externals._frame_animation = (void (*)(uint32_t, matrix*, vector3<float>*, anim_frame*, anim_header*, hrc_bone*, hrc_data*))get_absolute_value(ff7_externals.draw_3d_model, 0xDB);
 	ff7_externals.root_animation = (void (*)(matrix*, anim_frame*, anim_header*, hrc_data*))get_absolute_value(ff7_externals.draw_3d_model, 0xE7);

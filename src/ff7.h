@@ -1091,7 +1091,7 @@ struct anim_header
 		} file;
 	};
 	uint32_t num_frames;
-	uint32_t num_bones;
+	int num_bones;
 	char rotation_order[4];
 	void *frame_data;
 	struct anim_frame *anim_frames;
@@ -1130,7 +1130,7 @@ struct hrc_bone
 struct bone_list_member
 {
 	WORD bone_type;
-	WORD bone_index;
+	short bone_index;
 };
 
 struct rsd_array_member
@@ -1697,8 +1697,8 @@ struct ff7_game_obj
 	struct list *list_2E8;
 	struct polygon_set *polygon_set_2EC;
 	struct polygon_set *polygon_set_2F0;
-	struct stack *matrix_stack1;
-	struct stack *matrix_stack2;
+	void *matrix_stack1;
+	void *matrix_stack2;
 	struct matrix *camera_matrix;
 	struct graphics_instance *graphics_instance;
 	uint32_t field_304;
@@ -1745,7 +1745,7 @@ struct ff7_game_obj
 	struct matrix matrix_8D0;
 	void *dx_sfx_something;
 	struct list *tex_list_pointer;
-	struct stack *stack_918;
+	void *stack_918;
 	uint32_t field_91C;
 	void *_3d2d_something;
 	uint32_t field_924;
@@ -2446,9 +2446,9 @@ struct ff7_externals
 	uint32_t kernel2_get_text;
 	char **kernel_1to9_sections;
 	uint32_t draw_3d_model;
-	void (*stack_push)(struct stack *);
-	void *(*stack_top)(struct stack *);
-	void (*stack_pop)(struct stack *);
+	void (*stack_push)(void *);
+	void *(*stack_top)(void *);
+	void (*stack_pop)(void *);
 	void (*_root_animation)(struct matrix *, struct anim_frame *, struct anim_header *, struct hrc_data *);
 	void (*_frame_animation)(uint32_t, struct matrix *, vector3<float> *, struct anim_frame *, struct anim_header *, struct hrc_bone *, struct hrc_data *);
 	void (*root_animation)(struct matrix *, struct anim_frame *, struct anim_header *, struct hrc_data *);

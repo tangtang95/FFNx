@@ -370,14 +370,14 @@ void sub_6B2720(struct indexed_primitive *ip)
 void draw_3d_model(uint32_t current_frame, struct anim_header *anim_header, struct struc_110 *struc_110, struct hrc_data *hrc_data, struct ff7_game_obj *game_object)
 {
 	struct anim_frame *anim_frame;
-	struct stack *matrix_stack;
+	void *matrix_stack;
 	struct matrix *root_matrix;
 	void (*root_animation_sub)(struct matrix *, struct anim_frame *, struct anim_header *, struct hrc_data *);
 	void (*frame_animation_sub)(uint32_t, struct matrix *, vector3<float> *, struct anim_frame *, struct anim_header *, struct hrc_bone *, struct hrc_data *);
 
 	if(!anim_header) return;
 	if(!hrc_data) return;
-	if(current_frame >= anim_header->num_frames) return;
+	if(current_frame < 0 || current_frame >= anim_header->num_frames) return;
 
 	anim_frame = &anim_header->anim_frames[current_frame];
 
@@ -439,6 +439,7 @@ void draw_3d_model(uint32_t current_frame, struct anim_header *anim_header, stru
 		if(struc_110->rotation.x != 0.0) rotate_matrix_x(DEG2RAD(struc_110->rotation.x), root_matrix);
 		if(struc_110->rotation.z != 0.0) rotate_matrix_z(DEG2RAD(struc_110->rotation.z), root_matrix);
 
+		// TODO: Missing some stuff when (*ff7_externals.model_mode & 0x400) != 0
 		root_matrix->_41 += struc_110->position.x;
 		root_matrix->_42 += struc_110->position.y;
 		root_matrix->_43 += struc_110->position.z;
@@ -477,7 +478,7 @@ void draw_3d_model(uint32_t current_frame, struct anim_header *anim_header, stru
 				ff7_externals.stack_push(matrix_stack);
 				bone_matrix = (struct matrix*)ff7_externals.stack_top(matrix_stack);
 
-				if(anim_header->num_bones <= bone_index) frame_rotation = &dummy_point;
+				if(anim_header->num_bones <= 0) frame_rotation = &dummy_point;
 				else frame_rotation = &anim_frame->data[bone_index];
 
 				frame_animation_sub(bone_index, &local_matrix, frame_rotation, anim_frame, anim_header, bone, hrc_data);
@@ -486,15 +487,24 @@ void draw_3d_model(uint32_t current_frame, struct anim_header *anim_header, stru
 
 				if(*ff7_externals.model_mode & MDL_USE_CAMERA_MATRIX)
 				{
-					if(hrc_data->flags & 0x4000 && struc_110->bone_matrices) matrix = &struc_110->bone_matrices[bone_index + 1];
-					else matrix = &eye_matrix;
-
-					multiply_matrix(bone_matrix, game_object->camera_matrix, matrix);
-
-					matrix->_14 = 0.0f;
-					matrix->_24 = 0.0f;
-					matrix->_34 = 0.0f;
-					matrix->_44 = 1.0f;
+					if(hrc_data->flags & 0x4000 && struc_110->bone_matrices)
+					{
+						matrix = &struc_110->bone_matrices[bone_index + 1];
+						multiply_matrix(bone_matrix, game_object->camera_matrix, matrix);
+						matrix->_14 = 0.0f;
+						matrix->_24 = 0.0f;
+						matrix->_34 = 0.0f;
+						matrix->_44 = 1.0f;
+					}
+					else
+					{
+						eye_matrix._14 = 0.0f;
+						eye_matrix._24 = 0.0f;
+						eye_matrix._34 = 0.0f;
+						eye_matrix._44 = 1.0f;
+						matrix = &eye_matrix;
+						multiply_matrix(bone_matrix, game_object->camera_matrix, matrix);
+					}
 
 					if(hrc_data->flags & 0x2000 && struc_110->bone_positions)
 					{
@@ -507,7 +517,7 @@ void draw_3d_model(uint32_t current_frame, struct anim_header *anim_header, stru
 
 				if(bone->rsd_array)
 				{
-					uint32_t i;
+					int i;
 					struct rsd_array_member *rsd_array_member;
 
 					for(i = 0, rsd_array_member = bone->rsd_array; i < bone->num_rsd; i++, rsd_array_member++)
@@ -521,8 +531,8 @@ void draw_3d_model(uint32_t current_frame, struct anim_header *anim_header, stru
 						if(!polygon_set) continue;
 
 						common_setmatrix(0, matrix, polygon_set->matrix_set, (struct game_obj *)game_object);
-						if(polygon_set->matrix_set) polygon_set->matrix_set->matrix_view = (struct matrix*)external_calloc(sizeof(struct matrix), 1);
-						common_setmatrix(1, bone_matrix, polygon_set->matrix_set, (struct game_obj *)game_object);
+						// if(polygon_set->matrix_set) polygon_set->matrix_set->matrix_view = (struct matrix*)external_calloc(sizeof(struct matrix), 1);
+						// common_setmatrix(1, bone_matrix, polygon_set->matrix_set, (struct game_obj *)game_object);
 
 						if(hrc_data->flags & 0x2000000)
 						{
