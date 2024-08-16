@@ -21,16 +21,18 @@
 //    GNU General Public License for more details.                          //
 /****************************************************************************/
 
+#include "globals.h"
 #include "ff7/world/renderer.h"
 #include "camera.h"
 #include "cfg.h"
 #include "gl.h"
-#include "globals.h"
 
 #include "../defs.h"
 #include "../../lighting.h"
 
 namespace ff7::world {
+
+    Renderer worldRenderer;
 
     void init_load_wm_bot_blocks() {
         ff7_externals.world_init_load_wm_bot_block_7533AF();

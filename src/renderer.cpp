@@ -40,8 +40,6 @@
 #include "utils.h"
 #include "renderer.h"
 
-CMRC_DECLARE(FFNx);
-
 Renderer newRenderer;
 RendererCallbacks bgfxCallbacks;
 
@@ -1101,15 +1099,15 @@ void Renderer::reset()
 
 void Renderer::prepareFFNxLogo()
 {
-    if (bgfx::isValid(FFNxLogoHandle))
-        bgfx::destroy(FFNxLogoHandle);
-
-    auto fs = cmrc::FFNx::get_filesystem();
-    auto logo = fs.open(FFNX_LOGO_PATH);
-
-    uint32_t width, height, mipCount = 0;
-    FFNxLogoHandle = createTextureHandle(&logo, FFNX_LOGO_PATH, &width, &height, &mipCount, true);
-    if (!FFNxLogoHandle.idx) FFNxLogoHandle = BGFX_INVALID_HANDLE;
+    /* if (bgfx::isValid(FFNxLogoHandle)) */
+    /*     bgfx::destroy(FFNxLogoHandle); */
+    /**/
+    /* auto fs = cmrc::FFNx::get_filesystem(); */
+    /* auto logo = fs.open(FFNX_LOGO_PATH); */
+    /**/
+    /* uint32_t width, height, mipCount = 0; */
+    /* FFNxLogoHandle = createTextureHandle(&logo, FFNX_LOGO_PATH, &width, &height, &mipCount, true); */
+    /* if (!FFNxLogoHandle.idx) FFNxLogoHandle = BGFX_INVALID_HANDLE; */
 }
 
 void Renderer::prepareShadowMap()
@@ -1892,73 +1890,10 @@ bimg::ImageContainer* Renderer::createImageContainer(const char* filename, bimg:
     return loadImageContainer(&defaultAllocator, filename, targetFormat);
 }
 
-bimg::ImageContainer* Renderer::createImageContainer(cmrc::file* file, bimg::TextureFormat::Enum targetFormat)
-{
-    bimg::ImageContainer* img = nullptr;
-
-    if (file->size() > 0)
-    {
-        img = bimg::imageParse(&defaultAllocator, file->begin(), file->size(), targetFormat);
-    }
-
-    return img;
-}
-
 bgfx::TextureHandle Renderer::createTextureHandle(char* filename, uint32_t* width, uint32_t* height, uint32_t* mipCount, bool isSrgb)
 {
     bgfx::TextureHandle ret = FFNX_RENDERER_INVALID_HANDLE;
     bimg::ImageContainer* img = createImageContainer(filename);
-
-    if (img != nullptr)
-    {
-        if (gl_check_texture_dimensions(img->m_width, img->m_height, filename) && doesItFitInMemory(img->m_size))
-        {
-            uint64_t flags = BGFX_SAMPLER_NONE;
-
-            if (isSrgb) flags |= BGFX_TEXTURE_SRGB;
-            else flags |= BGFX_TEXTURE_NONE;
-
-            const bgfx::Memory* mem = bgfx::makeRef(img->m_data, img->m_size, RendererReleaseImageContainer, img);
-            if (img->m_cubeMap)
-            {
-                ret = bgfx::createTextureCube(
-                    img->m_width,
-                    1 < img->m_numMips,
-                    img->m_numLayers,
-                    bgfx::TextureFormat::Enum(img->m_format),
-                    flags,
-                    mem
-                );
-            }
-            else
-            {
-
-                ret = bgfx::createTexture2D(
-                    img->m_width,
-                    img->m_height,
-                    1 < img->m_numMips,
-                    img->m_numLayers,
-                    bgfx::TextureFormat::Enum(img->m_format),
-                    flags,
-                    mem
-                );
-            }
-
-            *width = img->m_width;
-            *height = img->m_height;
-            *mipCount = img->m_numMips;
-
-            if (trace_all || trace_renderer) ffnx_trace("Renderer::%s: %u => %ux%u from filename %s\n", __func__, ret.idx, width, height, filename);
-        }
-    }
-
-    return ret;
-}
-
-bgfx::TextureHandle Renderer::createTextureHandle(cmrc::file* file, char* filename, uint32_t* width, uint32_t* height, uint32_t* mipCount, bool isSrgb)
-{
-    bgfx::TextureHandle ret = FFNX_RENDERER_INVALID_HANDLE;
-    bimg::ImageContainer* img = createImageContainer(file);
 
     if (img != nullptr)
     {

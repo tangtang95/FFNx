@@ -25,6 +25,8 @@
 #include "gamehacks.h"
 #include "globals.h"
 
+std::vector<MouseListener*> mouseListeners;
+std::vector<KeyListener*> keyListeners;
 byte keys[256];
 bool blockKeys = false;
 

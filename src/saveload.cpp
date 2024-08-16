@@ -22,9 +22,9 @@
 
 #include <stdio.h>
 #include <direct.h>
-#include "renderer.h"
 
 #include "log.h"
+#include "renderer.h"
 #include "gl.h"
 #include "utils.h"
 

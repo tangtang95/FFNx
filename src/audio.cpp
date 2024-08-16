@@ -19,8 +19,6 @@
 //    GNU General Public License for more details.                          //
 /****************************************************************************/
 
-#include "audio/openpsf/openpsf.h"
-
 #include "audio.h"
 
 #include "log.h"
@@ -158,19 +156,6 @@ bool NxAudioEngine::init()
 		if (trace_all || trace_ambient || trace_sfx || trace_music || trace_voice) vgm_log_set_callback(NULL, 100, 0, NxAudioEngineVgmstreamCallback);
 
 		loadConfig();
-
-		if (!he_bios_path.empty()) {
-			char fullHeBiosPath[MAX_PATH];
-			sprintf(fullHeBiosPath, "%s/%s", basedir, he_bios_path.c_str());
-
-			if (!Psf::initialize_psx_core(fullHeBiosPath)) {
-				ffnx_error("NxAudioEngine::%s couldn't load %s, please verify 'he_bios_path' or comment it\n", __func__, he_bios_path.c_str());
-			}
-			else {
-				_openpsf_loaded = true;
-				ffnx_info("NxAudioEngine::%s OpenPSF music plugin loaded using %s\n", __func__, he_bios_path.c_str());
-			}
-		}
 
 		for (int channel = 0; channel < _sfxTotalChannels; channel++) _sfxChannels[channel] = NxAudioEngineSFX();
 
@@ -582,18 +567,6 @@ SoLoud::AudioSource* NxAudioEngine::loadMusic(const char* name, bool isFullPath,
 		if (trace_all || trace_music) ffnx_trace("NxAudioEngine::%s: %s\n", __func__, filename);
 
 		cleanOldAudioSources();
-
-		if (_openpsf_loaded && SoLoud::OpenPsf::is_our_path(filename)) {
-			SoLoud::OpenPsf* openpsf = new SoLoud::OpenPsf();
-			music = openpsf;
-
-			SoLoud::result res = openpsf->load(filename, suppressOpeningSilence);
-			if (res != SoLoud::SO_NO_ERROR) {
-				ffnx_error("NxAudioEngine::%s: Cannot load %s with openpsf ( SoLoud error: %u )\n", __func__, filename, res);
-				delete openpsf;
-				music = nullptr;
-			}
-		}
 
 		if (music == nullptr) {
 			SoLoud::VGMStream* vgmstream = new SoLoud::VGMStream();

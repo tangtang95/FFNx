@@ -46,7 +46,7 @@ namespace ff7::field
     constexpr int MAX_FIELD_MODELS = 32;
     constexpr int BLINKING_FRAMES = 4;
 
-    std::array<external_field_model_data, MAX_FIELD_MODELS> external_model_data;
+    extern std::array<external_field_model_data, MAX_FIELD_MODELS> external_model_data;
 
     bool ff7_field_do_draw_3d_model(short x, short y);
     void ff7_field_update_models_position(int key_input_status);

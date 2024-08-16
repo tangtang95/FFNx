@@ -21,7 +21,9 @@
 
 #pragma once
 
-#include <mimalloc-new-delete.h>
+#include "ff7.h"
+#include "ff8.h"
+
 #include <windows.h>
 #include <toml++/toml.h>
 
@@ -38,9 +40,6 @@ extern "C" {
 #if defined(__cplusplus)
 }
 #endif
-
-#include "ff7.h"
-#include "ff8.h"
 
 #define FFNX_API __declspec(dllexport)
 

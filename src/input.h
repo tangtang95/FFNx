@@ -60,8 +60,8 @@ public:
 	virtual void KeyPress(KeyPressEventArgs e) = 0;
 };
 
-std::vector<MouseListener*> mouseListeners;
-std::vector<KeyListener*> keyListeners;
+extern std::vector<MouseListener*> mouseListeners;
+extern std::vector<KeyListener*> keyListeners;
 
 void SetBlockKeysFromGame(bool block = false);
 bool HandleInputEvents(UINT msg, WPARAM wParam, LPARAM lParam);

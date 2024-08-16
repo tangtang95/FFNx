@@ -22,8 +22,8 @@
 
 #pragma once
 
-extern short movie_fps_ratio = 1;
-extern bool is_movie_bgfield = false;
+extern short movie_fps_ratio;
+extern bool is_movie_bgfield;
 
 bool is_overlapping_movie_playing();
 void movie_init();

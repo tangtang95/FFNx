@@ -19,9 +19,8 @@
 //    GNU General Public License for more details.                          //
 /****************************************************************************/
 
-#include "../renderer.h"
-
 #include "../log.h"
+#include "../renderer.h"
 #include "../gl.h"
 #include "../macro.h"
 

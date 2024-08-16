@@ -21,27 +21,23 @@
 //    GNU General Public License for more details.                          //
 /****************************************************************************/
 
-#include <windows.h>
-#include <windowsx.h>
-#include <dwmapi.h>
-#include <stdio.h>
-#include <sys/timeb.h>
-#include <steamworkssdk/steam_api.h>
-#include <hwinfo/hwinfo.h>
-#include <regex>
-#include <shlwapi.h>
-#include <shlobj.h>
-#include <psapi.h>
-#include <mmsystem.h>
-#include <malloc.h>
-#include <ddraw.h>
-#include <filesystem>
+#ifndef VERSION
+#define VERSION "devel"
+#endif // !VERSION
 
+#include "common.h"
+
+#include <dwmapi.h>
+#include <shlwapi.h>
+#include <filesystem>
+#include <windows.h>
+#include <shlobj.h>
+
+#include "ff8_data.h"
+#include "crashdump.h"
 #include "renderer.h"
 #include "hext.h"
-#include "ff8_data.h"
 
-#include "crashdump.h"
 #include "macro.h"
 #include "ff7.h"
 #include "ff8.h"
@@ -77,6 +73,17 @@
 #include "ff8/file.h"
 
 #include "wine.h"
+
+#include <windowsx.h>
+#include <stdio.h>
+#include <sys/timeb.h>
+#include <steamworkssdk/steam_api.h>
+#include <hwinfo/hwinfo.h>
+#include <regex>
+#include <psapi.h>
+#include <mmsystem.h>
+#include <malloc.h>
+#include <ddraw.h>
 
 bool proxyWndProc = false;
 
@@ -194,7 +201,7 @@ uint32_t noop_a3(uint32_t a1, uint32_t a2, uint32_t a3) { return 0; }
 time_t profile_start;
 time_t profile_end;
 time_t profile_total;
-#endif PROFILE
+#endif // PROFILE
 
 // support code for the HEAP_DEBUG option
 #ifdef HEAP_DEBUG
@@ -814,7 +821,7 @@ int common_create_window(HINSTANCE hInstance, struct game_obj* game_object)
 	}
 
 	WndClass.style = CS_VREDRAW | CS_HREDRAW | CS_DBLCLKS;
-	WndClass.lpfnWndProc = WindowProc;
+	WndClass.lpfnWndProc = (WNDPROC)WindowProc;
 	WndClass.cbClsExtra = 0;
 	WndClass.cbWndExtra = 0;
 	WndClass.hInstance = hInstance;
@@ -2778,7 +2785,8 @@ void get_userdata_path(PCHAR buffer, size_t bufSize, bool isSavegameFile)
 
 				strcpy(searchPath, buffer);
 				strcat(searchPath, R"(\user_*)");
-				if (hFind = FindFirstFileA(searchPath, &pathFound))
+        hFind = FindFirstFileA(searchPath, &pathFound);
+				if (hFind)
 				{
 					PathAppendA(buffer, pathFound.cFileName);
 					FindClose(hFind);
@@ -3284,7 +3292,7 @@ __declspec(dllexport) HANDLE __stdcall dotemuCreateFileA(LPCSTR lpFileName, DWOR
 		uint8_t requiredDisk = *(uint8_t*)(*(DWORD*)ff8_externals.requiredDisk + 0xCC);
 		CHAR diskAsChar[2];
 
-		itoa(requiredDisk, diskAsChar, 10);
+		_itoa(requiredDisk, diskAsChar, 10);
 
 		// Search for the last '\' character and get a pointer to the next char
 		const char* pos = strrchr(lpFileName, 92) + 1;

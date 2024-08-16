@@ -398,3 +398,7 @@ cmake-build*/
 # vcpkg
 !make.exe
 vcpkg_installed/
+
+# Zig
+.zig-cache
+zig-out

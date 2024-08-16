@@ -36,6 +36,16 @@
 #include "field/defs.h"
 #include "field/background.h"
 
+int wide_viewport_x = -107;
+int wide_viewport_y = 0;
+int wide_viewport_width = 854;
+int wide_viewport_height = 480;
+
+int wide_game_x = 0;
+int wide_game_y = 0;
+int wide_game_width = 854;
+int wide_game_height = 480;
+
 int viewport_width_plus_x_widescreen_fix = 750;
 int swirl_framebuffer_offset_x_widescreen_fix = 106;
 int swirl_framebuffer_offset_y_widescreen_fix = 64;

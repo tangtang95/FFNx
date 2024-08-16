@@ -29,15 +29,15 @@
 #include "common.h"
 #include "ff7.h"
 
-int wide_viewport_x = -107;
-int wide_viewport_y = 0;
-int wide_viewport_width = 854;
-int wide_viewport_height = 480;
+extern int wide_viewport_x;
+extern int wide_viewport_y;
+extern int wide_viewport_width;
+extern int wide_viewport_height;
 
-int wide_game_x = 0;
-int wide_game_y = 0;
-int wide_game_width = 854;
-int wide_game_height = 480;
+extern int wide_game_x;
+extern int wide_game_y;
+extern int wide_game_width;
+extern int wide_game_height;
 
 void ff7_widescreen_hook_init();
 

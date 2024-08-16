@@ -32,6 +32,7 @@
 
 namespace ff7::field
 {
+    std::array<uint32_t, 256> original_opcode_table {0};
     std::set<field_bank_address> field_bank_address_to_be_fixed = {{14, 6}};
     field_bank_address mvief_bank_address;
 

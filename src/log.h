@@ -23,8 +23,8 @@
 
 // Header include necessary due to macro dependencies
 #include "cfg.h"
-#include "common.h"
 #include "globals.h"
+#include "common.h"
 
 #define ffnx_error(x, ...) debug_printf("ERROR", text_colors[TEXTCOLOR_RED], (x), ## __VA_ARGS__)
 #define ffnx_warning(x, ...) debug_printf("WARNING", text_colors[TEXTCOLOR_YELLOW], (x), ## __VA_ARGS__)

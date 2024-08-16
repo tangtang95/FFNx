@@ -29,7 +29,7 @@ namespace ff7::field
 {
     constexpr float INVALID_VALUE = -1000000;
 
-    vector2<float>
+    extern vector2<float>
         field_curr_delta_world_pos,
         last_valid_scripted_field_delta_world_pos,
         field_3d_world_pos,

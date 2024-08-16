@@ -35,6 +35,8 @@ enum MovieAudioLayers {
 
 char movie_music_path[512];
 char movie_voice_path[512];
+short movie_fps_ratio = 1;
+bool is_movie_bgfield = false;
 
 uint32_t ff7_prepare_movie(char *name, uint32_t loop, struct dddevice **dddevice, uint32_t dd2interface)
 {

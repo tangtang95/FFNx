@@ -22,13 +22,13 @@
 
 #pragma once
 
+#include "common_imports.h"
+
 #include <stdint.h>
 #include <stdio.h>
 #include <windows.h>
 #include <ddraw.h>
 #include <dinput.h>
-
-#include "common_imports.h"
 
 // FF7 modules, unknowns are either unused or not relevant to rendering
 enum ff8_game_modes
@@ -844,7 +844,7 @@ struct ff8_game_obj
 	uint32_t field_9A8;
 	uint32_t field_9AC;
 	uint32_t random_seed;
-	char *window_title;
+	const char *window_title;
 	char *window_class;
 	uint32_t use_custom_wndclass;
 	WNDCLASSA wndclass_struct;

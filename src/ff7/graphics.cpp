@@ -22,11 +22,10 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include "../log.h"
 #include "../renderer.h"
-
 #include "../ff7.h"
 #include "../macro.h"
-#include "../log.h"
 #include "../gl.h"
 #include "defs.h"
 
@@ -329,15 +328,15 @@ void ff7gl_field_78(struct ff7_polygon_set *polygon_set, struct ff7_game_obj *ga
 					{
 						if (matrix_set)	gl_set_worldview_matrix(matrix_set->matrix_world);
 						if (enable_lighting)
-						{					
-							update_view_matrix(game_object);		
+						{
+							update_view_matrix(game_object);
 							if(polygon_set->light != nullptr && game_lighting != GAME_LIGHTING_ORIGINAL)
 							{
 								struct light_data lightData;
 								fill_light_data(&lightData, polygon_set);
 								gl_draw_with_lighting(ip, polygon_set->polygon_data, &lightData, polygon_set->field_4);
-							} else 	gl_draw_with_lighting(ip, polygon_set->polygon_data, nullptr, polygon_set->field_4);						
-						} else 
+							} else 	gl_draw_with_lighting(ip, polygon_set->polygon_data, nullptr, polygon_set->field_4);
+						} else
 						{
 							if(polygon_set->light != nullptr && game_lighting != GAME_LIGHTING_ORIGINAL)
 							{

@@ -20,12 +20,11 @@
 //    GNU General Public License for more details.                          //
 /****************************************************************************/
 
-#include "../renderer.h"
-
-#include "../gl.h"
-#include "../macro.h"
 #include "../log.h"
 #include "../common.h"
+#include "../gl.h"
+#include "../macro.h"
+#include "../renderer.h"
 #include "../video/movies.h"
 #include "../ff7/battle/menu.h"
 #include "../ff7/widescreen.h"

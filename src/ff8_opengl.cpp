@@ -49,6 +49,9 @@ constexpr int intro_credits_fade_frames = 33;
 constexpr int intro_credits_adjusted_frames = 438; // Instead of 374 in the Game
 constexpr int intro_credits_frames_between_music_start_and_first_image = 180;
 
+uint32_t(*ff8_read_file)(uint32_t count, void* buffer, struct ff8_file* file) = nullptr;
+void (*ff8_close_file)(struct ff8_file* file) = nullptr;
+
 void ff8gl_field_78(struct ff8_polygon_set *polygon_set, struct ff8_game_obj *game_object)
 {
 	struct matrix_set *matrix_set;

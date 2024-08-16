@@ -32,6 +32,9 @@
 
 namespace ff7::field
 {
+
+    std::array<external_field_model_data, MAX_FIELD_MODELS> external_model_data;
+
     bool ff7_field_do_draw_3d_model(short x, short y)
     {
         if(*ff7_externals.field_bg_flag_CC15E4)
@@ -105,12 +108,12 @@ namespace ff7::field
 
         if(is_fps_running_more_than_original() && *ff7_externals.field_id == 748)
         {
-            // Fix softlock related to this discussion https://github.com/julianxhokaxhiu/FFNx/discussions/569. 
+            // Fix softlock related to this discussion https://github.com/julianxhokaxhiu/FFNx/discussions/569.
             // The issue is due to the fact that when Cloud climb up, there is a mini auto movement which triggers a line making Cloud jump below.
             // This script that makes Cloud jump below does not end well, which makes the next script overlapping with this.
             // If the next script is to climb back up, there is a sort of race condition where the player movability is activated.
             // Then if the player taps the DOWN button, it will go into a softlock.
-            // 
+            //
             // This logic is very fragile (might cause other softlock), so, the solution is to write another logic only for this map
             int interpolationStep = external_model_data[model_id].moveFrameIndex + 1;
             if(external_model_data[model_id].moveFrameIndex == 0)

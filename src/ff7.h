@@ -22,12 +22,12 @@
 
 #pragma once
 
+#include "common.h"
+
 #include <ddraw.h>
 #include <stdio.h>
 #include <array>
 #include <span>
-
-#include "common.h"
 
 /*
  * Primitive types supported by the engine, mostly a 1:1 mapping to PSX GPU
@@ -1815,7 +1815,7 @@ struct ff7_game_obj
 	uint32_t field_9A8;
 	uint32_t field_9AC;
 	uint32_t random_seed;
-	char *window_title;
+	const char *window_title;
 	char *window_class;
 	uint32_t use_custom_wndclass;
 	WNDCLASSA wndclass_struct;

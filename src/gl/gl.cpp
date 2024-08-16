@@ -24,14 +24,14 @@
 #include <math.h>
 #include <algorithm>
 
+#include "../log.h"
 #include "../renderer.h"
 #include "../cfg.h"
-#include "../gl.h"
+#include "../ff7/widescreen.h"
 #include "../macro.h"
-#include "../log.h"
 #include "../matrix.h"
 
-#include "../ff7/widescreen.h"
+#include "../gl.h"
 
 struct matrix d3dviewport_matrix = {
 	1.0f, 0.0f, 0.0f, 0.0f,

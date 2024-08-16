@@ -25,17 +25,17 @@
 
 namespace ff7::world
 {
-    bool is_key_pressed(int current_key_status, int key)
+    inline bool is_key_pressed(int current_key_status, int key)
     {
         return (current_key_status & key) != 0;
     }
 
-    bool is_key_pressed_first_time(int current_key_status, int prev_key_status, int key)
+    inline bool is_key_pressed_first_time(int current_key_status, int prev_key_status, int key)
     {
         return (current_key_status & key) != 0 && (prev_key_status & key) == 0;
     }
 
-    bool is_key_released(int current_key_status, int prev_key_status, int key)
+    inline bool is_key_released(int current_key_status, int prev_key_status, int key)
     {
         return (current_key_status & key) == 0 && (prev_key_status & key) != 0;
     }

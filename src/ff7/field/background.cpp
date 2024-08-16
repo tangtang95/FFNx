@@ -21,6 +21,8 @@
 //    GNU General Public License for more details.                          //
 /****************************************************************************/
 
+#include <functional>
+
 #include "../../common.h"
 #include "../../globals.h"
 #include "../widescreen.h"
@@ -32,11 +34,18 @@
 #include "utils.h"
 #include "camera.h"
 
-#include <functional>
-
 namespace ff7::field
 {
     constexpr float MIN_STEP_INVERSE = 10.f;
+
+    vector2<float>
+        field_curr_delta_world_pos,
+        last_valid_scripted_field_delta_world_pos,
+        field_3d_world_pos,
+        bg_main_layer_pos,
+        bg_layer3_pos,
+        bg_layer4_pos,
+        cursor_position;
 
     // ##################################################################
     // ----------------- DRAW GRAPHICS RELATED --------------------------

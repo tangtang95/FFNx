@@ -24,7 +24,6 @@
 #pragma once
 
 #include <bgfx/bgfx.h>
-#include <imgui.h>
 #include "imgui_club/imgui_memory_editor.h"
 #include "input.h"
 

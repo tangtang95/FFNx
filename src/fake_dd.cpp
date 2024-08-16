@@ -19,11 +19,11 @@
 //    GNU General Public License for more details.                          //
 /****************************************************************************/
 
+#include "log.h"
 #include "renderer.h"
+#include "gl.h"
 
 #include "fake_dd.h"
-#include "gl.h"
-#include "log.h"
 
 uint32_t __stdcall fake_dd_blit_fast(struct ddsurface **me, uint32_t unknown1, uint32_t unknown2, struct ddsurface **target, LPRECT source, uint32_t unknown3);
 uint32_t __stdcall fake_ddsurface_get_pixelformat(struct ddsurface **me, LPDDPIXELFORMAT pf);

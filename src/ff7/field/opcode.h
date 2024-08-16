@@ -49,7 +49,7 @@ namespace ff7::field
         }
     };
 
-    std::array<uint32_t, 256> original_opcode_table {0};
+    extern std::array<uint32_t, 256> original_opcode_table;
 
     short ff7_opcode_multiply_get_bank_value(short bank, short address);
     short ff7_opcode_divide_get_bank_value(short bank, short address);

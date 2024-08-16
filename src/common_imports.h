@@ -21,10 +21,10 @@
 
 #pragma once
 
-#include <windows.h>
-#include <stdint.h>
-
 #include "matrix.h"
+
+#include <stdint.h>
+#include <windows.h>
 
 /*
  * Render states supported by the graphics engine
@@ -111,18 +111,18 @@ typedef void (gfx_field_EC)(struct game_obj *);
 
 struct color_ui8
 {
-    byte r;
-    byte g;
-    byte b;
-    byte a;
+    unsigned char r;
+    unsigned char g;
+    unsigned char b;
+    unsigned char a;
 };
 
 struct bgra_color_ui8
 {
-    byte b;
-    byte g;
-    byte r;
-    byte a;
+    unsigned char b;
+    unsigned char g;
+    unsigned char r;
+    unsigned char a;
 };
 
 struct bgra_color

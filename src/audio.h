@@ -21,15 +21,16 @@
 
 #pragma once
 
+#include "log.h"
+
+#include "audio/memorystream/memorystream.h"
+#include "audio/vgmstream/vgmstream.h"
+
 #include <stack>
 #include <string>
 #include <vector>
 #include <unordered_map>
 #include <soloud.h>
-#include "audio/memorystream/memorystream.h"
-#include "audio/vgmstream/vgmstream.h"
-
-#include "log.h"
 
 #define NXAUDIOENGINE_INVALID_HANDLE 0xfffff000
 
@@ -166,7 +167,6 @@ private:
 
 	bool _engineInitialized = false;
 	SoLoud::Soloud _engine;
-	bool _openpsf_loaded = false;
 
 	// SFX
 	short _sfxReusableChannels = 0;

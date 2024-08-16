@@ -24,9 +24,9 @@
 #include <libpng16/png.h>
 
 #include "image.h"
+#include "../log.h"
 #include "../common.h"
 #include "../renderer.h"
-#include "log.h"
 
 static void LibPngErrorCb(png_structp png_ptr, const char* error)
 {

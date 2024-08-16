@@ -21,18 +21,18 @@
 //    GNU General Public License for more details.                          //
 /****************************************************************************/
 
-#include "external_mesh.h"
-
-#include "cfg.h"
 #include "log.h"
+#include "cfg.h"
 #include "utils.h"
+
+#include "external_mesh.h"
 
 #define CGLTF_IMPLEMENTATION
 #include "cgltf.h"
 
 bool ExternalMesh::importExternalMeshGltfFile(char* file_path, char* tex_path)
 {
-	cgltf_options options = {0};
+	cgltf_options options = {};
 	cgltf_data* data = NULL;
 	cgltf_result result = cgltf_parse_file(&options, file_path, &data);
 	if (result != cgltf_result_success)

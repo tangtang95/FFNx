@@ -22,12 +22,12 @@
 
 #pragma once
 
+#include "common_imports.h"
+
 #include <windows.h>
 #include <mmsystem.h>
 #include <dinput.h>
 #include <dsound.h>
-
-#include "common_imports.h"
 
 // all known OFFICIAL versions of FF7 & FF8 released for the PC
 #define VERSION_FF7_102_US          1
@@ -122,7 +122,7 @@ enum GamepadAnalogueIntent
 struct game_mode
 {
 	uint32_t mode;
-	char *name;
+	const char *name;
 	uint32_t driver_mode;
 	uint32_t trace;
 	uint32_t main_loop;
@@ -266,7 +266,7 @@ struct common_externals
 	uint32_t sfx_stop;
 	uint32_t sfx_release;
 	uint32_t (*play_sfx)(uint32_t);
-	uint32_t (*play_sfx_effects)(byte, uint32_t, uint32_t, uint32_t, uint32_t);
+	uint32_t (*play_sfx_effects)(unsigned char, uint32_t, uint32_t, uint32_t, uint32_t);
 	uint32_t play_sfx_on_channel;
 	uint32_t (*set_sfx_volume_on_channel)(uint32_t, uint32_t);
 	uint32_t (*set_sfx_volume_trans_on_channel)(uint32_t, uint32_t, uint32_t);
@@ -327,7 +327,7 @@ void *driver_realloc(void *ptr, uint32_t size);
 extern time_t profile_start;
 extern time_t profile_end;
 extern time_t profile_total;
-#endif PROFILE
+#endif
 
 struct driver_stats
 {
