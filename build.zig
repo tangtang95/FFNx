@@ -100,9 +100,6 @@ pub fn build(b: *std.Build) void {
             "-DFFNx_EXPORTS",
             "-D_DEBUG_FUNCTIONAL_MACHINERY",
             "-Wall",
-            "-Wmicrosoft",
-            "-Wno-invalid-token-paste",
-            "-Wno-unknown-pragmas",
             "-Wno-unused-value",
             "-DBX_CONFIG_DEBUG=1", // For BX debug mode
             "-DDIRECTINPUT_VERSION=0x0800",
