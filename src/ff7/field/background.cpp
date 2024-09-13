@@ -113,7 +113,7 @@ namespace ff7::field
             uint32_t tile_index = (*ff7_externals.field_layer2_palette_sort)[i];
             vector2<float> tile_position;
 
-            char anim_group = layer2_tiles[tile_index].anim_group;
+            byte anim_group = layer2_tiles[tile_index].anim_group;
             if(anim_group && !(ff7_externals.modules_global_object->background_sprite_layer[anim_group] & layer2_tiles[tile_index].anim_bitmask))
                 continue;
 
@@ -195,7 +195,7 @@ namespace ff7::field
 
             field_layer3_shift_tile_position(&tile_position, &bg_position, layer3_width, layer3_height);
 
-            char anim_group = layer3_tiles[tile_index].anim_group;
+            byte anim_group = layer3_tiles[tile_index].anim_group;
             if(tile_position.x <= bg_position.x - left_offset || tile_position.x >= bg_position.x + right_offset ||
                 tile_position.y <= bg_position.y - top_offset || tile_position.y >= bg_position.y + bottom_offset ||
                 (anim_group && !(ff7_externals.modules_global_object->background_sprite_layer[anim_group] & layer3_tiles[tile_index].anim_bitmask)))
@@ -235,7 +235,7 @@ namespace ff7::field
 
                     field_layer3_shift_tile_position(&tile_position, &bg_position, layer3_width, layer3_height);
 
-                    char anim_group = layer3_tiles[tile_index].anim_group;
+                    byte anim_group = layer3_tiles[tile_index].anim_group;
                     if(tile_position.x <= bg_position.x - left_offset || tile_position.x >= bg_position.x + right_offset ||
                         tile_position.y <= bg_position.y - top_offset || tile_position.y >= bg_position.y + bottom_offset ||
                         (anim_group && !(ff7_externals.modules_global_object->background_sprite_layer[anim_group] & layer3_tiles[tile_index].anim_bitmask)))
@@ -317,7 +317,7 @@ namespace ff7::field
 
                 field_layer4_shift_tile_position(&tile_position, &bg_position, layer4_width, layer4_height);
 
-                char anim_group = layer4_tiles[tile_index].anim_group;
+                byte anim_group = layer4_tiles[tile_index].anim_group;
                 if(tile_position.x <= bg_position.x - left_offset || tile_position.x >= bg_position.x + right_offset ||
                     tile_position.y <= bg_position.y - top_offset || tile_position.y >= bg_position.y + bottom_offset ||
                     (anim_group && !(ff7_externals.modules_global_object->background_sprite_layer[anim_group] & layer4_tiles[tile_index].anim_bitmask)))
@@ -357,7 +357,7 @@ namespace ff7::field
 
                         field_layer4_shift_tile_position(&tile_position, &bg_position, layer4_width, layer4_height);
 
-                        char anim_group = layer4_tiles[tile_index].anim_group;
+                        byte anim_group = layer4_tiles[tile_index].anim_group;
                         if(tile_position.x <= bg_position.x - left_offset || tile_position.x >= bg_position.x + right_offset ||
                             tile_position.y <= bg_position.y - top_offset || tile_position.y >= bg_position.y + bottom_offset ||
                             (anim_group && !(ff7_externals.modules_global_object->background_sprite_layer[anim_group] & layer4_tiles[tile_index].anim_bitmask)))
@@ -647,7 +647,7 @@ namespace ff7::field
                 *ff7_externals.field_bg_flag_CC15E4 = 1;
                 *ff7_externals.scripted_world_move_n_steps = ff7_externals.modules_global_object->field_20;
                 *ff7_externals.scripted_world_move_step_index = 0;
-                world_pos = {-(*ff7_externals.field_curr_delta_world_pos_x), -(*ff7_externals.field_curr_delta_world_pos_y)};
+                world_pos = {static_cast<short>(-*ff7_externals.field_curr_delta_world_pos_x), static_cast<short>(-*ff7_externals.field_curr_delta_world_pos_y)};
 
                 if(is_fieldmap_wide())
                     field_widescreen_width_clip_with_camera_range(&world_pos);
@@ -659,7 +659,7 @@ namespace ff7::field
             case 4:
                 *ff7_externals.field_bg_flag_CC15E4 = 1;
 
-                world_pos = {-(ff7_externals.modules_global_object->field_A), -(ff7_externals.modules_global_object->field_C)};
+                world_pos = {static_cast<short>(-ff7_externals.modules_global_object->field_A), static_cast<short>(-ff7_externals.modules_global_object->field_C)};
                 if(is_fieldmap_wide())
                     field_widescreen_width_clip_with_camera_range(&world_pos);
 
@@ -673,14 +673,14 @@ namespace ff7::field
                 *ff7_externals.scripted_world_move_n_steps = ff7_externals.modules_global_object->field_20;
                 *ff7_externals.scripted_world_move_step_index = 0;
 
-                world_pos = {(-*ff7_externals.field_curr_delta_world_pos_x), -(*ff7_externals.field_curr_delta_world_pos_y)};
+                world_pos = {static_cast<short>((-*ff7_externals.field_curr_delta_world_pos_x)), static_cast<short>(-(*ff7_externals.field_curr_delta_world_pos_y))};
                 if(is_fieldmap_wide())
                     field_widescreen_width_clip_with_camera_range(&world_pos);
 
                 *ff7_externals.scripted_world_initial_pos_x = -world_pos.x;
                 *ff7_externals.scripted_world_initial_pos_y = -world_pos.y;
 
-                world_pos = {-(ff7_externals.modules_global_object->field_A), -(ff7_externals.modules_global_object->field_C)};
+                world_pos = {static_cast<short>(-(ff7_externals.modules_global_object->field_A)), static_cast<short>(-(ff7_externals.modules_global_object->field_C))};
                 if(is_fieldmap_wide())
                     field_widescreen_width_clip_with_camera_range(&world_pos);
 
@@ -777,11 +777,11 @@ namespace ff7::field
                 {
                     if(is_fieldmap_wide())
                     {
-                        world_pos = {-(*ff7_externals.scripted_world_final_pos_x), -(*ff7_externals.scripted_world_final_pos_y)};
+                        world_pos = {static_cast<short>(-(*ff7_externals.scripted_world_final_pos_x)), static_cast<short>(-(*ff7_externals.scripted_world_final_pos_y))};
                         field_widescreen_width_clip_with_camera_range(&world_pos);
                         *ff7_externals.scripted_world_final_pos_x = -world_pos.x;
 
-                        world_pos = {-(*ff7_externals.scripted_world_initial_pos_x), -(*ff7_externals.scripted_world_initial_pos_y)};
+                        world_pos = {static_cast<short>(-(*ff7_externals.scripted_world_initial_pos_x)), static_cast<short>(-(*ff7_externals.scripted_world_initial_pos_y))};
                         field_widescreen_width_clip_with_camera_range(&world_pos);
                         *ff7_externals.scripted_world_initial_pos_x = -world_pos.x;
                     }
@@ -836,7 +836,7 @@ namespace ff7::field
 
             if(is_fieldmap_wide())
             {
-                world_pos = {-(*ff7_externals.field_curr_delta_world_pos_x), -(*ff7_externals.field_curr_delta_world_pos_y)};
+                world_pos = {static_cast<short>(-(*ff7_externals.field_curr_delta_world_pos_x)), static_cast<short>(-(*ff7_externals.field_curr_delta_world_pos_y))};
                 field_widescreen_width_clip_with_camera_range(&world_pos);
                 *ff7_externals.field_curr_delta_world_pos_x = -world_pos.x;
             }

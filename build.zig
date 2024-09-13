@@ -104,10 +104,6 @@ pub fn build(b: *std.Build) void {
             "-Wno-invalid-token-paste",
             "-Wno-unknown-pragmas",
             "-Wno-unused-value",
-            "-Wno-microsoft-cast",
-            "-Wno-writable-strings",
-            "-Wno-constant-conversion",
-            "-Wno-c++11-narrowing",
             "-DBX_CONFIG_DEBUG=1", // For BX debug mode
             "-DDIRECTINPUT_VERSION=0x0800",
             "-D_CRT_SECURE_NO_WARNINGS",

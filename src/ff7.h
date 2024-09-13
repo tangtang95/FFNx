@@ -1450,7 +1450,7 @@ struct field_tile
 	WORD tile_size_y;
 	WORD palette_index;
 	WORD flags;
-	char anim_group;
+	byte anim_group;
 	char anim_bitmask;
 	WORD field_36;
 	char field_38[4096];
